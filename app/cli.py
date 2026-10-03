@@ -53,6 +53,7 @@ def cmd_seed(args: argparse.Namespace) -> None:
     admin / adminpass   (admin)
     """
     from app.database import ensure_db_and_tables, get_cli_session
+    from app.models.academic import Course
     from app.repositories.user import UserRepository
     from app.schemas.user import AdminCreate, RegularUserCreate
     from app.utilities.security import encrypt_password
@@ -61,16 +62,23 @@ def cmd_seed(args: argparse.Namespace) -> None:
     ensure_db_and_tables()
 
     demo_users = [
-        ("bob", "bob@example.com", "bobpass", "regular_user"),
-        ("admin", "admin@example.com", "adminpass", "admin"),
+        ("bob", "bob@example.com", "bobpass", "regular_user", "BSc Computer Science"),
+        ("admin", "admin@example.com", "adminpass", "admin", ""),
     ]
 
     created = 0
     skipped = 0
     with get_cli_session() as session:
         repo = UserRepository(session)
-        for username, email, password, role in demo_users:
-            if repo.get_by_username(username):
+        for username, email, password, role, degree_name in demo_users:
+            existing_user = repo.get_by_username(username)
+            if existing_user:
+                if not existing_user.degree_name and degree_name:
+                    existing_user.degree_name = degree_name
+                if not existing_user.degree_level:
+                    existing_user.degree_level = "Level 1"
+                    session.add(existing_user)
+                    session.commit()
                 print(f"  skip  {username} (already exists)")
                 skipped += 1
                 continue
@@ -81,10 +89,31 @@ def cmd_seed(args: argparse.Namespace) -> None:
                     email=email,
                     password=encrypt_password(password),
                     role=role,
+                    degree_name=degree_name,
+                    degree_level="Level 1",
                 )
             )
             print(f"  create {username} ({role})")
             created += 1
+
+        demo_courses = [
+            ("COMP 0000", "Intro to Computing", 3, "Core"),
+            ("COMP 2100", "Data Structures", 3, "Core"),
+            ("COMP 2200", "Database Systems", 3, "Core"),
+            ("MATH 1200", "Discrete Mathematics", 3, "Foundation"),
+            ("STAT 1000", "Introductory Statistics", 3, "Elective"),
+        ]
+        for code, name, credits, course_type in demo_courses:
+            if session.get(Course, code) is None:
+                session.add(
+                    Course(
+                        course_code=code,
+                        course_name=name,
+                        credit_amt=credits,
+                        course_type=course_type,
+                    )
+                )
+        session.commit()
 
     print(f"Seed done — created {created}, skipped {skipped}.")
     print("Login with bob/bobpass or admin/adminpass")

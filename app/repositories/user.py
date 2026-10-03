@@ -44,6 +44,30 @@ class UserRepository:
     def get_by_id(self, user_id: int) -> Optional[User]:
         return self.db.get(User, user_id)
 
+    def update_academic_details(
+        self,
+        user_id: int,
+        degree_name: str,
+        degree_level: str,
+        target_credits: int,
+        required_core_courses: int,
+        required_foundation_courses: int,
+        required_elective_courses: int,
+    ) -> User:
+        user = self.db.get(User, user_id)
+        if user is None:
+            raise ValueError("User not found.")
+        user.degree_name = degree_name.strip()
+        user.degree_level = degree_level
+        user.target_credits = target_credits
+        user.required_core_courses = required_core_courses
+        user.required_foundation_courses = required_foundation_courses
+        user.required_elective_courses = required_elective_courses
+        self.db.add(user)
+        self.db.commit()
+        self.db.refresh(user)
+        return user
+
     def get_all_users(self) -> list[User]:
         return self.db.exec(select(User)).all()
 

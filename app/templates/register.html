@@ -4,22 +4,39 @@
 {% block content %}
 <div class="auth-shell">
   <div class="auth-panel">
-    <a class="auth-back" href="{{ url_for('index_view') }}">← Home</a>
-    <div class="brand-wordmark">FastStarter</div>
-    <p class="auth-tagline">Create an account</p>
+    <div class="auth-header">
+      <a class="auth-back" href="{{ url_for('index_view') }}" aria-label="Back to home" title="Back to home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+             stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+             aria-hidden="true">
+          <path d="M19 12H5"></path>
+          <path d="m12 19-7-7 7-7"></path>
+        </svg>
+        <span class="visually-hidden">Back to home</span>
+      </a>
+      <div class="brand-wordmark">MyAdvisor</div>
+    </div>
+    <p class="auth-tagline">Create your academic workspace</p>
 
-    <form method="POST" action="{{ url_for('register_view') }}">
+    <form method="POST" action="{{ url_for('register_view') }}" novalidate>
       <div class="mb-3">
         <label class="form-label" for="username">Username</label>
         <input class="form-control" type="text" id="username" name="username" required autofocus>
+        <div class="invalid-feedback" id="username-feedback" hidden>Username is required.</div>
       </div>
       <div class="mb-3">
         <label class="form-label" for="email">Email</label>
         <input class="form-control" type="email" id="email" name="email" required>
+        <div class="invalid-feedback" id="email-feedback" hidden>Enter a valid email address.</div>
       </div>
       <div class="mb-3">
         <label class="form-label" for="password">Password</label>
         <input class="form-control" type="password" id="password" name="password" required>
+        <div class="invalid-feedback" id="password-feedback" hidden>Password is required.</div>
+        <div class="form-check mt-2">
+          <input class="form-check-input" type="checkbox" id="show-password">
+          <label class="form-check-label small text-muted" for="show-password">Show password</label>
+        </div>
       </div>
       <div class="d-grid gap-2 mb-3">
         <button class="btn btn-primary btn-lg" type="submit">Register</button>
@@ -32,4 +49,54 @@
     </form>
   </div>
 </div>
+{% endblock %}
+
+{% block external_js %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.querySelector("form");
+  const fields = [...form.querySelectorAll("input[required]")];
+  const password = document.getElementById("password");
+  const showPassword = document.getElementById("show-password");
+
+  function clearField(field) {
+    field.classList.remove("is-invalid");
+    field.removeAttribute("aria-invalid");
+    const message = document.getElementById(`${field.id}-feedback`);
+    message.hidden = true;
+    message.classList.remove("d-block");
+  }
+
+  function invalid(field) {
+    if (!field.value.trim()) return true;
+    return field.type === "email" && !field.validity.valid;
+  }
+
+  form.addEventListener("submit", (event) => {
+    let firstInvalid = null;
+    fields.forEach((field) => {
+      clearField(field);
+      if (invalid(field)) {
+        const message = document.getElementById(`${field.id}-feedback`);
+        field.classList.add("is-invalid", "validation-shake");
+        field.setAttribute("aria-invalid", "true");
+        message.hidden = false;
+        message.classList.add("d-block");
+        firstInvalid = firstInvalid || field;
+        window.setTimeout(() => field.classList.remove("validation-shake"), 450);
+      }
+    });
+
+    if (firstInvalid) {
+      event.preventDefault();
+      firstInvalid.focus();
+    }
+  });
+
+  fields.forEach((field) => field.addEventListener("input", () => clearField(field)));
+  showPassword.addEventListener("change", () => {
+    password.type = showPassword.checked ? "text" : "password";
+  });
+});
+</script>
 {% endblock %}

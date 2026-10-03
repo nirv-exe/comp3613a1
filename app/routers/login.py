@@ -23,6 +23,7 @@ async def login_action_ajax(
     username: str = Form(),
     password: str = Form(),
 ):
+    username = username.strip()
     user_repo = UserRepository(db)
     auth_service = AuthService(user_repo)
     access_token = auth_service.authenticate_user(username, password)
@@ -34,7 +35,7 @@ async def login_action_ajax(
         )
 
     user = user_repo.get_by_username(username)
-    dest = "admin_home_view" if user and user.role == "admin" else "user_home_view"
+    dest = "admin_dashboard_view" if user and user.role == "admin" else "user_home_view"
     response = RedirectResponse(
         url=request.url_for(dest),
         status_code=status.HTTP_303_SEE_OTHER,

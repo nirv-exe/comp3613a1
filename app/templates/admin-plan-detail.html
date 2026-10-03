@@ -1,0 +1,276 @@
+{% extends "authenticated-base.html" %}
+{% block title %}Review request{% endblock %}
+
+{% block subpage_content %}
+<div class="container-fluid py-2 advisor-detail-page">
+  <section class="advisor-detail-card">
+    <div class="advisor-detail-header">
+      <a class="btn btn-sm btn-outline-secondary square-back"
+         href="{{ url_for('admin_requests_view') }}" aria-label="Back to requests">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round"
+             stroke-linejoin="round" aria-hidden="true">
+          <path d="M19 12H5"></path>
+          <path d="m12 19-7-7 7-7"></path>
+        </svg>
+      </a>
+      <div>
+        <h1 class="h6 mb-1">{{ student.username }} - {{ student.degree_name }}</h1>
+        <div><strong>ID:</strong> {{ plan.submitted_student_id }}</div>
+        <div><strong>Semester:</strong> {{ plan.semester }}</div>
+        <div class="mt-2">
+          <strong>Status:</strong>
+          <span class="badge {% if plan.status == 'approved' %}text-bg-success{% elif plan.status == 'rejected' %}text-bg-danger{% else %}text-bg-warning{% endif %}">
+            {{ plan.status|replace("_", " ")|title }}
+          </span>
+        </div>
+      </div>
+      <div class="text-muted small">Submitted on: {{ plan.submission_date or "—" }}</div>
+    </div>
+
+    <div class="advisor-detail-grid">
+      <div>
+        <h2 class="h6">Requested Courses</h2>
+        <div class="advisor-course-list">
+          {% for item, course in items %}
+          <div class="advisor-course-row">
+            <span>{{ item.course_order }}.</span>
+            <span>{{ course.course_code }} - {{ course.course_name }}</span>
+            <span>{{ course.course_type }}</span>
+            <span>{{ course.credit_amt }}</span>
+          </div>
+          {% endfor %}
+        </div>
+        <div class="student-note-panel">
+          <h2 class="h6">Student Notes/Requests</h2>
+          <p class="mb-0">{{ plan.student_notes or "No additional notes." }}</p>
+        </div>
+      </div>
+
+      <aside>
+        <div class="requirements-panel">
+          <h2 class="h6">Student Outstanding Requirements</h2>
+          <div class="requirements-grid">
+            <div><strong>{{ progress.remaining_credits }}</strong><span>credits</span></div>
+            <div><strong>{{ progress.outstanding_requirements.core_courses }}</strong><span>core courses</span></div>
+            <div><strong>{{ progress.outstanding_requirements.elective_courses }}</strong><span>electives</span></div>
+            <div><strong>{{ progress.outstanding_requirements.foundation_courses }}</strong><span>foundation courses</span></div>
+          </div>
+        </div>
+        {% if plan.status == "submitted" %}
+        <form class="feedback-panel" method="post" novalidate
+              onsubmit="return validateReviewSubmission(event)"
+              action="{{ url_for('admin_plan_review_action', plan_id=plan.plan_id) }}">
+          <h2 class="h6">Advisor Feedback</h2>
+          <textarea class="form-control" name="advisor_feedback" rows="5"
+                    placeholder="Add feedback after reviewing this request.">{{ plan.advisor_feedback or "" }}</textarea>
+          <div class="invalid-feedback" id="advisor-feedback-validation" hidden>
+            Feedback is required when rejecting a request.
+          </div>
+          <div class="review-actions">
+            <button class="btn btn-success" type="submit" name="decision" value="approved">Approve</button>
+            <button class="btn btn-outline-danger" type="submit" name="decision" value="rejected">Reject</button>
+          </div>
+        </form>
+        {% else %}
+        <div class="feedback-panel feedback-panel-readonly">
+          <h2 class="h6">Advisor Feedback</h2>
+          <p class="mb-0">{{ plan.advisor_feedback or "No advisor feedback provided." }}</p>
+        </div>
+        {% endif %}
+      </aside>
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block additional_scripts %}
+<script>
+function validateReviewSubmission(event) {
+  if (event.submitter && event.submitter.value === "rejected") {
+    const feedback = document.querySelector('textarea[name="advisor_feedback"]');
+    if (!feedback.value.trim()) {
+      window.alert("Feedback is required when rejecting a request.");
+      feedback.focus();
+      return false;
+    }
+  }
+  return true;
+}
+</script>
+{% endblock %}
+
+{% block subpage_scripts %}
+<script>
+function validateReviewSubmission(event) {
+  const feedback = document.querySelector('textarea[name="advisor_feedback"]');
+  const validationMessage = document.getElementById("advisor-feedback-validation");
+
+  feedback.classList.remove("is-invalid");
+  feedback.classList.remove("validation-shake");
+  validationMessage.classList.remove("d-block");
+  validationMessage.hidden = true;
+
+  if (event.submitter && event.submitter.value === "rejected" && !feedback.value.trim()) {
+    feedback.classList.add("is-invalid", "validation-shake");
+    feedback.setAttribute("aria-invalid", "true");
+    validationMessage.classList.add("d-block");
+    validationMessage.hidden = false;
+    feedback.focus();
+    window.setTimeout(() => feedback.classList.remove("validation-shake"), 450);
+    return false;
+  }
+
+  feedback.removeAttribute("aria-invalid");
+  return true;
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const feedback = document.querySelector('textarea[name="advisor_feedback"]');
+  const validationMessage = document.getElementById("advisor-feedback-validation");
+  feedback.addEventListener("input", () => {
+    feedback.classList.remove("is-invalid");
+    feedback.removeAttribute("aria-invalid");
+    validationMessage.classList.remove("d-block");
+    validationMessage.hidden = true;
+  });
+});
+</script>
+{% endblock %}
+
+{% block additional_styles %}
+<style>
+.advisor-detail-card {
+  position: relative;
+  min-height: calc(100vh - 3rem);
+  padding: 1.5rem;
+  background: var(--brand-surface);
+  border: 1px solid #d8e0e8;
+  border-radius: var(--brand-radius);
+  box-shadow: 0 0.25rem 0.8rem rgba(39, 49, 61, 0.08);
+}
+
+.advisor-detail-header {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 1rem;
+  align-items: start;
+  margin-bottom: 2rem;
+}
+
+.square-back {
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.advisor-detail-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(22rem, 0.65fr);
+  gap: 1.5rem;
+  min-height: calc(100vh - 14rem);
+}
+
+.advisor-detail-grid > div,
+.advisor-detail-grid > aside {
+  display: flex;
+  flex-direction: column;
+}
+
+.advisor-course-list,
+.requirements-panel,
+.feedback-panel {
+  border: 1px solid #cfd8e2;
+  border-radius: 0.45rem;
+  overflow: hidden;
+  padding: 1rem;
+}
+
+.advisor-course-row {
+  display: grid;
+  grid-template-columns: 2rem minmax(0, 1fr) 6rem 4rem;
+  gap: 0.75rem;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid #e1e7ed;
+}
+
+.advisor-course-row:last-child {
+  border-bottom: 0;
+}
+
+.feedback-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  margin-top: 1rem;
+  min-height: 12rem;
+  padding-bottom: 4.5rem;
+}
+
+.feedback-panel textarea {
+  flex: 1;
+  min-height: 20rem;
+  resize: vertical;
+}
+
+.feedback-panel textarea.is-invalid {
+  background-color: #fff1f1;
+  border-color: #dc3545;
+}
+
+.validation-shake {
+  animation: validation-shake 0.45s ease-in-out;
+}
+
+@keyframes validation-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-0.35rem); }
+  75% { transform: translateX(0.35rem); }
+}
+
+.review-actions {
+  display: flex;
+  gap: 0.65rem;
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+}
+
+.student-note-panel {
+  flex: 1;
+  border: 1px solid #cfd8e2;
+  border-radius: 0.45rem;
+  padding: 1rem;
+  margin-top: 1rem;
+  min-height: 10rem;
+}
+
+.advisor-detail-grid aside .feedback-panel {
+  flex: 1;
+}
+
+.requirements-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  text-align: center;
+}
+
+.requirements-grid div {
+  display: flex;
+  flex-direction: column;
+}
+
+.requirements-grid strong {
+  font-size: 1.35rem;
+}
+
+.requirements-grid span {
+  color: var(--brand-muted);
+  font-size: 0.7rem;
+}
+</style>
+{% endblock %}

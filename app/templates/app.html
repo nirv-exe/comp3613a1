@@ -3,7 +3,88 @@
 
 {% block subpage_content %}
 <div class="container-fluid py-2">
-  <h1 class="h4 mb-2">Home</h1>
-  <p class="text-muted mb-0">Workflow screens replace this shell in Phase 5 implement.</p>
+  <div class="mb-4">
+    <p class="text-uppercase small fw-semibold text-primary mb-1">Track degree progress</p>
+    <h1 class="h3 mb-1">Dashboard</h1>
+  </div>
+
+  <section class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <h2 class="h6 mb-3">Current Progress - Credits Gained</h2>
+      <canvas id="progressChart" height="130"
+              aria-label="{{ progress.completed_credits }} of {{ progress.target_credits }} credits completed"></canvas>
+    </div>
+  </section>
+
+  <div class="row g-3">
+    <div class="col-lg-5">
+      <section class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <h2 class="h6 mb-3">In Progress</h2>
+          {% if progress.completed_courses %}
+          <div class="d-flex justify-content-between border-bottom py-2">
+            <span>{{ progress.completed_courses[-1].name }}</span>
+            <span class="text-muted">{{ progress.completed_courses[-1].credits }} credits</span>
+          </div>
+          {% else %}
+          <p class="text-muted mb-0">No courses recorded yet.</p>
+          {% endif %}
+        </div>
+      </section>
+    </div>
+    <div class="col-lg-7">
+      <section class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <h2 class="h6 mb-3">Outstanding Requirements</h2>
+          <div class="row text-center">
+            <div class="col"><strong class="fs-4">{{ progress.remaining_credits }}</strong><div class="small text-muted">credits</div></div>
+            <div class="col"><strong class="fs-4">{{ progress.outstanding_requirements.core_courses }}</strong><div class="small text-muted">core courses</div></div>
+            <div class="col"><strong class="fs-4">{{ progress.outstanding_requirements.elective_courses }}</strong><div class="small text-muted">electives</div></div>
+            <div class="col"><strong class="fs-4">{{ progress.outstanding_requirements.foundation_courses }}</strong><div class="small text-muted">foundation courses</div></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+  <a class="floating-action floating-action-secondary" href="{{ url_for('progress_history_view') }}">View History</a>
 </div>
+{% endblock %}
+
+{% block additional_styles %}
+<style>
+#progressChart {
+ max-height: 190px;
+}
+</style>
+{% endblock %}
+
+{% block external_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+ new Chart(document.getElementById("progressChart"), {
+   type: "line",
+   data: {
+     labels: ["Credits gained", "Current progress", "Degree total"],
+     datasets: [{
+       data: [0, {{ progress.completed_credits }}, {{ progress.target_credits }}],
+       borderColor: "#3d75b9",
+       backgroundColor: "rgba(61, 117, 185, 0.12)",
+       borderWidth: 2,
+       pointRadius: 4,
+       pointBackgroundColor: "#3d75b9",
+       fill: false,
+       tension: 0
+     }]
+   },
+   options: {
+     responsive: true,
+     maintainAspectRatio: false,
+     plugins: { legend: { display: false } },
+     scales: {
+       x: { grid: { display: false } },
+       y: { beginAtZero: true, max: {{ progress.target_credits }}, ticks: { precision: 0 } }
+     }
+   }
+ });
+</script>
 {% endblock %}

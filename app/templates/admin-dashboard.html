@@ -1,0 +1,146 @@
+{% extends "authenticated-base.html" %}
+{% block title %}Advisor dashboard{% endblock %}
+
+{% block subpage_content %}
+<div class="container-fluid py-2 advisor-dashboard-page">
+  <div class="mb-4">
+    <p class="text-uppercase small fw-semibold text-primary mb-1">Advisor view</p>
+    <h1 class="h3 mb-1">Dashboard</h1>
+  </div>
+
+  <section class="dashboard-section mb-4">
+    <h2 class="h5 mb-3">Breakdown</h2>
+    <div class="dashboard-breakdown">
+      <div><strong>{{ dashboard.request_count }}</strong><span>Requests</span></div>
+      <div><strong>{{ dashboard.level_counts.level_1 }}</strong><span>Level 1</span></div>
+      <div><strong>{{ dashboard.level_counts.level_2 }}</strong><span>Level 2</span></div>
+      <div><strong>{{ dashboard.level_counts.level_3 }}</strong><span>Level 3</span></div>
+    </div>
+  </section>
+
+  <section class="dashboard-section mb-4">
+    <h2 class="h5 mb-3">New Requests</h2>
+    <div class="dashboard-table-wrap">
+      <table class="table align-middle mb-0 dashboard-request-table">
+        <thead>
+          <tr>
+            <th>Name: ID</th>
+            <th>Degree Level</th>
+            <th>Date of Submission</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for plan, student in dashboard.new_requests %}
+          <tr>
+            <td>{{ student.username }}: {{ plan.submitted_student_id }}</td>
+            <td>{{ student.degree_level or "—" }}</td>
+            <td>{{ plan.submission_date or "—" }}</td>
+            <td><a class="btn btn-sm btn-outline-primary"
+                   href="{{ url_for('admin_plan_detail_view', plan_id=plan.plan_id) }}">Review</a></td>
+          </tr>
+        {% else %}
+          <tr><td colspan="4" class="text-muted">No new requests.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="dashboard-section">
+    <h2 class="h5 mb-3">Outstanding Requests (&gt; 3 Days)</h2>
+    <div class="dashboard-table-wrap">
+      <table class="table align-middle mb-0 dashboard-request-table">
+        <thead>
+          <tr>
+            <th>Name: ID</th>
+            <th>Degree Level</th>
+            <th>Date of Submission</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for plan, student in dashboard.outstanding_requests %}
+          <tr>
+            <td>{{ student.username }}: {{ plan.submitted_student_id }}</td>
+            <td>{{ student.degree_level or "—" }}</td>
+            <td>{{ plan.submission_date or "—" }}</td>
+            <td><a class="btn btn-sm btn-outline-primary"
+                   href="{{ url_for('admin_plan_detail_view', plan_id=plan.plan_id) }}">Review</a></td>
+          </tr>
+        {% else %}
+          <tr><td colspan="4" class="text-muted">No outstanding requests.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block additional_styles %}
+<style>
+.advisor-dashboard-page {
+  max-width: 72rem;
+}
+
+.dashboard-section {
+  width: 100%;
+}
+
+.dashboard-breakdown,
+.dashboard-table-wrap {
+  border: 1px solid #cfd8e2;
+  border-radius: 0.45rem;
+  background: var(--brand-surface);
+}
+
+.dashboard-breakdown {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  padding: 1.1rem;
+  text-align: center;
+}
+
+.dashboard-breakdown div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.dashboard-breakdown strong {
+  font-size: 1.45rem;
+}
+
+.dashboard-breakdown span {
+  color: var(--brand-muted);
+  font-size: 0.8rem;
+}
+
+.dashboard-table-wrap {
+  overflow: hidden;
+}
+
+.dashboard-request-table {
+  table-layout: fixed;
+}
+
+.dashboard-request-table th,
+.dashboard-request-table td {
+  padding: 0.9rem 1rem;
+}
+
+.dashboard-request-table th:nth-child(1),
+.dashboard-request-table td:nth-child(1) { width: 32%; }
+
+.dashboard-request-table th:nth-child(2),
+.dashboard-request-table td:nth-child(2) { width: 24%; }
+
+.dashboard-request-table th:nth-child(3),
+.dashboard-request-table td:nth-child(3) { width: 27%; }
+
+.dashboard-request-table th:nth-child(4),
+.dashboard-request-table td:nth-child(4) { width: 17%; }
+</style>
+{% endblock %}

@@ -3,31 +3,34 @@
 {% block internal_css %}
 <style>
     body {
+        height: 100vh;
         overflow-x: hidden;
+        overflow-y: hidden;
         background: #f4f6f8;
     }
 
     #wrapper {
         display: flex;
-        min-height: 100vh;
+        height: 100vh;
+        min-height: 0;
     }
 
     #sidebar {
         min-width: 250px;
         max-width: 250px;
-        min-height: 100vh;
-        transition: all 0.3s;
+        height: 100vh;
+        min-height: 0;
+        flex: 0 0 250px;
+        position: relative;
         background: var(--brand-sidebar);
         color: #fff;
-    }
-
-    #sidebar.collapsed {
-        margin-left: -250px;
     }
 
     #sidebar .nav-link {
         color: var(--brand-sidebar-text);
         font-weight: 500;
+        justify-content: center;
+        text-align: center;
     }
 
     #sidebar .nav-link:hover,
@@ -35,6 +38,21 @@
         color: #fff;
         background-color: color-mix(in srgb, var(--brand-accent) 55%, #000);
         border-radius: 0.5rem;
+    }
+
+    #sidebar .nav-link .material-symbols-outlined {
+        margin-right: 0.5rem;
+    }
+
+    #sidebar .sidebar-main-nav {
+        position: absolute;
+        top: 50%;
+        left: 0.75rem;
+        right: 0.75rem;
+        transform: translateY(-50%);
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
     }
 
     #sidebar .brand-wordmark {
@@ -46,15 +64,53 @@
 
     #content {
         width: 100%;
+        min-width: 0;
+        min-height: 0;
+        height: 100vh;
         padding: 1rem;
         transition: all 0.3s;
         display: flex;
         flex-direction: column;
+        overflow-y: auto;
+        overflow-x: hidden;
         background-color: #f4f6f8;
+    }
+
+    .app-toast-container {
+        position: fixed;
+        right: 1.25rem;
+        bottom: 1.25rem;
+        z-index: 1080;
+    }
+
+    .app-toast-container .toast {
+        border: 1px solid #cfe0d4;
+        border-left: 0.3rem solid #39805a;
+        box-shadow: 0 0.5rem 1.25rem rgba(39, 49, 61, 0.18);
     }
 
     .navbar {
         border-bottom: 1px solid #dee2e6;
+    }
+
+    .floating-action {
+        position: fixed;
+        right: 1.5rem;
+        bottom: 1.5rem;
+        z-index: 10;
+        border-radius: 999px;
+        padding: 0.75rem 1.1rem;
+        color: #fff;
+        background: var(--brand-accent);
+        border: 1px solid var(--brand-accent);
+        box-shadow: 0 0.5rem 1.25rem rgba(39, 49, 61, 0.2);
+        text-decoration: none;
+    }
+
+    .floating-action:hover {
+        color: #fff;
+        background: #315f96;
+        border-color: #315f96;
     }
 </style>
 {% block additional_styles %}{% endblock %}
@@ -63,17 +119,59 @@
 {% block content %}
 <div id="wrapper">
     <nav id="sidebar" class="p-3 d-flex flex-column vh-100">
-        <div class="brand-wordmark">FastStarter</div>
+        <div class="brand-wordmark">MyAdvisor</div>
 
         <ul class="nav nav-pills flex-column gap-2 flex-grow-1">
+            <div class="sidebar-main-nav">
+            {% if user.role == "admin" %}
             <li class="nav-item">
-                <a class="nav-link d-flex align-items-center {{ 'active' if request.url.path.startswith('/app') }}"
-                   href="{{ url_for('user_home_view') }}">
-                    <span class="material-symbols-outlined me-2">home</span>
-                    Home
+                <a class="nav-link d-flex align-items-center {{ 'active' if request.url.path == '/admin/dashboard' }}"
+                   href="{{ url_for('admin_dashboard_view') }}">
+                    <span class="material-symbols-outlined me-2">dashboard</span>
+                    Dashboard
                 </a>
             </li>
+            <li class="nav-item">
+                <a class="nav-link d-flex align-items-center {{ 'active' if request.url.path.startswith('/admin/requests') }}"
+                   href="{{ url_for('admin_requests_view') }}">
+                    <span class="material-symbols-outlined me-2">assignment</span>
+                    Manage Requests
+                </a>
+            </li>
+            {% else %}
+            <li class="nav-item">
+                <a class="nav-link d-flex align-items-center {{ 'active' if request.url.path == '/app' }}"
+                   href="{{ url_for('user_home_view') }}">
+                    <span class="material-symbols-outlined me-2">school</span>
+                    Track Progress
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link d-flex align-items-center {{ 'active' if request.url.path.startswith('/app/plan-semester') }}"
+                   href="{{ url_for('plan_semester_view') }}">
+                    <span class="material-symbols-outlined me-2">calendar_month</span>
+                    Plan Semester
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link d-flex align-items-center {{ 'active' if request.url.path.startswith('/app/profile') }}"
+                   href="{{ url_for('profile_view') }}">
+                    <span class="material-symbols-outlined me-2">manage_accounts</span>
+                    Profile
+                </a>
+            </li>
+            {% endif %}
+            </div>
             <li class="nav-item mt-auto">
+                <div class="px-3 pb-2 text-white">
+                    <div class="fw-semibold">{{ user.username }}</div>
+                    {% if user.role == "admin" %}
+                    <div class="small text-white-50">Advisor</div>
+                    {% else %}
+                    <div class="small text-white-50">Student</div>
+                    <div class="small text-white-50">{{ user.degree_level }}</div>
+                    {% endif %}
+                </div>
                 <a class="nav-link d-flex align-items-center text-danger" href="{{ url_for('logout') }}">
                     <span class="material-symbols-outlined me-2">logout</span>
                     Logout
@@ -83,31 +181,30 @@
     </nav>
 
     <div id="content">
-        <nav class="navbar navbar-expand-lg bg-white mb-4 px-3 rounded-3 shadow-sm">
-            <button class="btn btn-outline-secondary" id="menu-toggle" type="button">
-                <span class="material-symbols-outlined md-dark">menu</span>
-            </button>
-            <div class="ms-auto d-flex align-items-center gap-3">
-                <span class="fw-semibold">Welcome, {{ user.username }}</span>
-            </div>
-        </nav>
-
-        <div class="row">
-            <div class="col-12">
-                {% for message in get_flashed_messages(request) %}
-                <div class="alert alert-{{ message.type }}" role="alert">{{ message.message }}</div>
-                {% endfor %}
-            </div>
-        </div>
-
         {% block subpage_content %}{% endblock %}
     </div>
 </div>
 
+{% set flashed_messages = get_flashed_messages(request) %}
+{% if flashed_messages %}
+<div class="toast-container app-toast-container" aria-live="polite" aria-atomic="true">
+    {% for message in flashed_messages %}
+    <div class="toast show" role="status" data-bs-autohide="true" data-bs-delay="3500">
+        <div class="toast-header">
+            <span class="material-symbols-outlined text-success me-2" aria-hidden="true">check_circle</span>
+            <strong class="me-auto">{{ "Success" if message.type == "success" else message.type|title }}</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        </div>
+        <div class="toast-body">{{ message.message }}</div>
+    </div>
+    {% endfor %}
+</div>
 <script>
-    document.getElementById("menu-toggle").addEventListener("click", function () {
-        document.getElementById("sidebar").classList.toggle("collapsed");
+    document.querySelectorAll(".app-toast-container .toast").forEach((toastElement) => {
+        bootstrap.Toast.getOrCreateInstance(toastElement).show();
     });
 </script>
+{% endif %}
+
 {% block subpage_scripts %}{% endblock %}
 {% endblock %}

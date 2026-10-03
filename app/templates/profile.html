@@ -1,0 +1,123 @@
+{% extends "authenticated-base.html" %}
+{% block title %}Profile{% endblock %}
+
+{% block subpage_content %}
+<div class="container-fluid py-2">
+  <div class="mb-4">
+    <p class="text-uppercase small fw-semibold text-primary mb-1">Student profile</p>
+    <h1 class="h3 mb-1">Academic details</h1>
+    <p class="text-muted mb-0">Keep your degree information and credit target up to date.</p>
+  </div>
+
+  <section class="card border-0 shadow-sm profile-card">
+    <div class="card-body">
+      <form method="post" novalidate id="profile-form">
+        <div class="mb-3">
+          <label class="form-label" for="degree_name">Degree name</label>
+          <input class="form-control" id="degree_name" name="degree_name"
+                 value="{{ user.degree_name }}" required>
+          <div class="invalid-feedback" id="degree_name-feedback" hidden>Enter your degree name.</div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label" for="degree_level">Degree level</label>
+          <select class="form-select" id="degree_level" name="degree_level" required>
+            {% for level in ["Level 1", "Level 2", "Level 3", "Level 4"] %}
+            <option value="{{ level }}" {% if user.degree_level == level %}selected{% endif %}>{{ level }}</option>
+            {% endfor %}
+          </select>
+          <div class="invalid-feedback" id="degree_level-feedback" hidden>Select your degree level.</div>
+        </div>
+        <div class="mb-4">
+          <label class="form-label" for="target_credits">Target credits</label>
+          <input class="form-control" type="number" min="1" id="target_credits"
+                 name="target_credits" value="{{ user.target_credits }}" required>
+          <div class="invalid-feedback" id="target_credits-feedback" hidden>Enter a positive target credit value.</div>
+        </div>
+        <h2 class="h6 mb-3">Required courses</h2>
+        <div class="row g-3 mb-4">
+          <div class="col-md-4">
+            <label class="form-label" for="required_core_courses">Core courses</label>
+            <input class="form-control" type="number" min="0" id="required_core_courses"
+                   name="required_core_courses" value="{{ user.required_core_courses }}" required>
+            <div class="invalid-feedback" id="required_core_courses-feedback" hidden>Enter zero or more.</div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label" for="required_foundation_courses">Foundation courses</label>
+            <input class="form-control" type="number" min="0" id="required_foundation_courses"
+                   name="required_foundation_courses" value="{{ user.required_foundation_courses }}" required>
+            <div class="invalid-feedback" id="required_foundation_courses-feedback" hidden>Enter zero or more.</div>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label" for="required_elective_courses">Elective courses</label>
+            <input class="form-control" type="number" min="0" id="required_elective_courses"
+                   name="required_elective_courses" value="{{ user.required_elective_courses }}" required>
+            <div class="invalid-feedback" id="required_elective_courses-feedback" hidden>Enter zero or more.</div>
+          </div>
+        </div>
+        <button class="btn btn-primary" type="submit">Save academic details</button>
+      </form>
+
+      {% for message in get_flashed_messages(request) %}
+      <div class="alert alert-{{ message.type }} mt-3 mb-0" role="alert">{{ message.message }}</div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endblock %}
+
+{% block additional_styles %}
+<style>
+.profile-card {
+  max-width: 42rem;
+}
+
+.profile-card .form-control.is-invalid,
+.profile-card .form-select.is-invalid {
+  background-color: #fff1f1;
+  border-color: #dc3545;
+}
+</style>
+{% endblock %}
+
+{% block external_js %}
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("profile-form");
+  const fields = [...form.querySelectorAll("[required]")];
+
+  function clearField(field) {
+    field.classList.remove("is-invalid", "validation-shake");
+    field.removeAttribute("aria-invalid");
+    const message = document.getElementById(`${field.id}-feedback`);
+    message.hidden = true;
+    message.classList.remove("d-block");
+  }
+
+  form.addEventListener("submit", (event) => {
+    let firstInvalid = null;
+    fields.forEach((field) => {
+      clearField(field);
+      const invalid = !field.value.trim()
+        || (field.id === "target_credits" && Number(field.value) <= 0)
+        || (field.id !== "target_credits" && field.type === "number" && Number(field.value) < 0);
+      if (invalid) {
+        const message = document.getElementById(`${field.id}-feedback`);
+        field.classList.add("is-invalid", "validation-shake");
+        field.setAttribute("aria-invalid", "true");
+        message.hidden = false;
+        message.classList.add("d-block");
+        firstInvalid = firstInvalid || field;
+        window.setTimeout(() => field.classList.remove("validation-shake"), 450);
+      }
+    });
+    if (firstInvalid) {
+      event.preventDefault();
+      firstInvalid.focus();
+    }
+  });
+
+  fields.forEach((field) => field.addEventListener("input", () => clearField(field)));
+  fields.forEach((field) => field.addEventListener("change", () => clearField(field)));
+});
+</script>
+{% endblock %}

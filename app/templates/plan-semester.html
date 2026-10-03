@@ -1,0 +1,385 @@
+{% extends "authenticated-base.html" %}
+{% block title %}Plan semester{% endblock %}
+
+{% block external_css %}
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+{% endblock %}
+
+{% block subpage_scripts %}
+<script>
+function validateAdvisorSelection() {
+  const studentId = document.getElementById("student_id");
+  const semester = document.getElementById("semester");
+  const advisor = document.getElementById("advisor");
+  const fields = [
+    [studentId, "Please enter your student ID before submitting."],
+    [semester, "Please enter the semester before submitting."],
+    [advisor, "Please select an advisor before submitting your request."]
+  ];
+
+  fields.forEach(([field]) => clearValidation(field));
+  const invalidField = fields.find(([field]) => !field.value.trim());
+  if (invalidField) {
+    const [field, message] = invalidField;
+    showValidation(field, message);
+    return false;
+  }
+  return true;
+}
+
+function showValidation(field, message) {
+  field.classList.add("is-invalid", "validation-shake");
+  field.setAttribute("aria-invalid", "true");
+  const feedback = document.getElementById(`${field.id}-feedback`);
+  if (feedback) {
+    feedback.textContent = message;
+    feedback.classList.add("d-block");
+    feedback.hidden = false;
+  }
+  field.focus();
+  window.setTimeout(() => field.classList.remove("validation-shake"), 450);
+}
+
+function clearValidation(field) {
+  field.classList.remove("is-invalid");
+  field.removeAttribute("aria-invalid");
+  const feedback = document.getElementById(`${field.id}-feedback`);
+  if (feedback) {
+    feedback.classList.remove("d-block");
+    feedback.hidden = true;
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  ["student_id", "semester", "advisor"].forEach((fieldId) => {
+    const field = document.getElementById(fieldId);
+    field.addEventListener("input", () => clearValidation(field));
+    field.addEventListener("change", () => clearValidation(field));
+  });
+});
+</script>
+{% endblock %}
+
+{% block subpage_content %}
+<div class="container-fluid py-2">
+  <div class="mb-4">
+    <p class="text-uppercase small fw-semibold text-primary mb-1">Student view</p>
+    <h1 class="h3 mb-1">Plan Semester</h1>
+  </div>
+
+  {% if show_form %}
+  <section class="card border-0 shadow-sm">
+    <div class="card-body p-4">
+      <div class="d-flex align-items-start gap-3 mb-4">
+        <a class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center justify-content-center"
+           href="{{ url_for('plan_semester_view') }}" aria-label="Back to requests">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2" stroke-linecap="round"
+               stroke-linejoin="round" aria-hidden="true">
+            <path d="M19 12H5"></path>
+            <path d="m12 19-7-7 7-7"></path>
+          </svg>
+        </a>
+        <div>
+          <h2 class="h5 mb-1">{{ user.username }} - {{ user.degree_name }}</h2>
+          <p class="text-muted mb-0">Complete your semester request for advisor review.</p>
+        </div>
+      </div>
+
+      <form method="post" action="{{ url_for('plan_semester_submit') }}" novalidate
+            onsubmit="return validateAdvisorSelection()">
+        <div class="row g-4">
+          <div class="col-lg-8">
+            <div class="row g-3 mb-4">
+              <div class="col-md-6">
+                <label class="form-label" for="student_id">ID</label>
+                <input class="form-control" id="student_id" name="student_id"
+                       placeholder="Enter your student ID (816XXXXXX)" required>
+                <div class="invalid-feedback" id="student_id-feedback" hidden></div>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label" for="semester">Semester</label>
+                <input class="form-control" id="semester" name="semester"
+                       placeholder="e.g. 2026/2027 Semester 1" required>
+                <div class="invalid-feedback" id="semester-feedback" hidden></div>
+              </div>
+            </div>
+
+            <h2 class="h6 mb-2">Request Courses</h2>
+            <div class="table-responsive border rounded-3 course-table-container">
+              <table class="table align-middle mb-0 course-request-table">
+                <thead>
+                  <tr><th style="width: 3rem">#</th><th>Course</th><th>Type</th><th>Credits</th></tr>
+                </thead>
+                <tbody>
+                {% for row in range(5) %}
+                <tr>
+                  <td>{{ row + 1 }}.</td>
+                  <td>
+                    <select class="form-select course-picker" name="course_codes"
+                            aria-label="Course {{ row + 1 }}">
+                      <option value="">Select course</option>
+                      {% for course in courses %}
+                      <option value="{{ course.course_code }}"
+                              data-type="{{ course.course_type }}"
+                              data-credits="{{ course.credit_amt }}">
+                        {{ course.course_code }} - {{ course.course_name }}
+                      </option>
+                      {% endfor %}
+                    </select>
+                  </td>
+                  <td class="course-type text-muted">—</td>
+                  <td class="course-credits text-muted">—</td>
+                </tr>
+                {% endfor %}
+                </tbody>
+              </table>
+            </div>
+
+            <label class="form-label mt-4" for="student_notes">Additional Notes/Requests</label>
+            <textarea class="form-control" id="student_notes" name="student_notes"
+                      rows="4" placeholder="Would you recommend doing an extra course?"></textarea>
+          </div>
+
+          <div class="col-lg-4 semester-form-sidebar">
+            <div class="card bg-light border-0 mb-3">
+              <div class="card-body">
+                <h2 class="h6">Outstanding Requirements</h2>
+                <div class="row text-center g-2">
+                  <div class="col-6"><strong class="fs-4">{{ progress.remaining_credits }}</strong><div class="small text-muted">credits</div></div>
+                  <div class="col-6"><strong class="fs-4">2</strong><div class="small text-muted">core courses</div></div>
+                  <div class="col-6"><strong class="fs-4">0</strong><div class="small text-muted">electives</div></div>
+                  <div class="col-6"><strong class="fs-4">0</strong><div class="small text-muted">foundation courses</div></div>
+                </div>
+              </div>
+            </div>
+            <label class="form-label" for="advisor">Select Advisor</label>
+            <select class="form-select" id="advisor" name="advisor_id" required>
+              <option value="">Select Advisor</option>
+              <option value="admin">Admin Advisor</option>
+            </select>
+            <div class="invalid-feedback" id="advisor-feedback" hidden></div>
+            <div class="semester-form-submit">
+              <button class="btn btn-primary" type="submit">Submit</button>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+  {% else %}
+  <section class="mb-4">
+    <h2 class="h5 mb-3">Current Requests</h2>
+    <div class="card border-0 shadow-sm">
+      <div class="table-responsive">
+        <table class="table align-middle mb-0 request-table">
+          <thead><tr><th>Request No.</th><th>Advisor Assigned</th><th>Date Submitted</th><th>Status</th></tr></thead>
+          <tbody>
+          {% for plan in plans if plan.status in ["submitted", "under_review"] %}
+            <tr><td class="fw-semibold"><a href="{{ url_for('semester_plan_detail_view', plan_id=plan.plan_id) }}">REQ-{{ "%04d"|format(plan.plan_id) }}</a></td><td>Pending assignment</td><td>{{ plan.submission_date or "—" }}</td><td><span class="badge {% if plan.status == 'approved' %}text-bg-success{% elif plan.status == 'rejected' %}text-bg-danger{% else %}text-bg-warning{% endif %}">{{ plan.status|replace("_", " ")|title }}</span></td></tr>
+          {% else %}
+            <tr><td colspan="4" class="text-muted">No current requests.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  <section>
+    <h2 class="h5 mb-3">Past Requests</h2>
+    <div class="card border-0 shadow-sm">
+      <div class="table-responsive">
+        <table class="table align-middle mb-0 request-table">
+          <thead><tr><th>Request No.</th><th>Advisor Assigned</th><th>Date Submitted</th><th>Status</th></tr></thead>
+          <tbody>
+          {% for plan in plans if plan.status not in ["submitted", "under_review"] %}
+            <tr><td class="fw-semibold"><a href="{{ url_for('semester_plan_detail_view', plan_id=plan.plan_id) }}">REQ-{{ "%04d"|format(plan.plan_id) }}</a></td><td>Pending assignment</td><td>{{ plan.submission_date or "—" }}</td><td><span class="badge {% if plan.status == 'approved' %}text-bg-success{% elif plan.status == 'rejected' %}text-bg-danger{% else %}text-bg-warning{% endif %}">{{ plan.status|replace("_", " ")|title }}</span></td></tr>
+          {% else %}
+            <tr><td colspan="4" class="text-muted">No past requests.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+  <a class="floating-action floating-action-primary" href="{{ url_for('plan_semester_view') }}?new=true">Submit new request</a>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block additional_styles %}
+<style>
+.form-control.is-invalid,
+.form-select.is-invalid {
+  background-color: #fff1f1;
+  border-color: #dc3545;
+}
+
+.validation-shake {
+  animation: validation-shake 0.45s ease-in-out;
+}
+
+.semester-form-sidebar {
+  display: flex;
+  flex-direction: column;
+}
+
+.semester-form-submit {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: auto;
+  padding-top: 1rem;
+}
+
+@keyframes validation-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-0.35rem); }
+  75% { transform: translateX(0.35rem); }
+}
+
+.card {
+  border: 1px solid #d8e0e8 !important;
+  border-radius: var(--brand-radius) !important;
+  overflow: hidden;
+}
+
+.table-responsive {
+  border: 1px solid #d8e0e8;
+  border-radius: var(--brand-radius);
+  overflow: hidden;
+  padding: 0.35rem 0.5rem;
+  background: var(--brand-surface);
+}
+
+.table-responsive .table {
+  margin-bottom: 0;
+}
+
+.table-responsive th,
+.table-responsive td {
+  padding: 0.75rem 0.85rem;
+}
+
+.table-responsive tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.request-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.request-table th:nth-child(1),
+.request-table td:nth-child(1) {
+  width: 22%;
+}
+
+.request-table th:nth-child(2),
+.request-table td:nth-child(2) {
+  width: 28%;
+}
+
+.request-table th:nth-child(3),
+.request-table td:nth-child(3) {
+  width: 27%;
+}
+
+.request-table th:nth-child(4),
+.request-table td:nth-child(4) {
+  width: 23%;
+}
+
+.course-table-container {
+  overflow: visible;
+}
+
+.course-request-table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.course-request-table th:nth-child(1),
+.course-request-table td:nth-child(1) {
+  width: 3rem;
+}
+
+.course-request-table th:nth-child(2),
+.course-request-table td:nth-child(2) {
+  width: 58%;
+  min-width: 0;
+}
+
+.course-request-table th:nth-child(3),
+.course-request-table td:nth-child(3),
+.course-request-table th:nth-child(4),
+.course-request-table td:nth-child(4) {
+  width: 19.5%;
+}
+
+.course-request-table td:nth-child(2) > * {
+  min-width: 0;
+}
+
+.course-picker,
+.ts-wrapper,
+.ts-control {
+  width: 100%;
+  max-width: 100%;
+}
+
+.ts-wrapper {
+  min-width: 0;
+}
+
+.ts-dropdown {
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: 100%;
+  box-sizing: border-box;
+  z-index: 20;
+}
+</style>
+{% endblock %}
+
+{% block external_js %}
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.4.3/dist/js/tom-select.complete.min.js"></script>
+<script>
+  const coursePickers = [];
+  const refreshCourseAvailability = () => {
+    const selectedCodes = new Set(
+      coursePickers.map(({ picker }) => picker.value).filter(Boolean)
+    );
+
+    coursePickers.forEach(({ picker, select }) => {
+      Object.keys(select.options).forEach((courseCode) => {
+        const option = select.options[courseCode];
+        select.updateOption(courseCode, {
+          ...option,
+          disabled: selectedCodes.has(courseCode) && picker.value !== courseCode
+        });
+      });
+      select.refreshOptions(false);
+    });
+  };
+
+  document.querySelectorAll(".course-picker").forEach((picker) => {
+    const select = new TomSelect(picker, {
+      create: false,
+      allowEmptyOption: true,
+      maxOptions: 100,
+      placeholder: picker.options[0].text
+    });
+    coursePickers.push({ picker, select });
+    select.on("dropdown_open", (dropdown) => {
+      dropdown.style.width = `${select.wrapper.getBoundingClientRect().width}px`;
+    });
+    select.on("change", (value) => {
+      const option = picker.options[picker.selectedIndex];
+      const row = picker.closest("tr");
+      row.querySelector(".course-type").textContent = option?.dataset.type || "—";
+      row.querySelector(".course-credits").textContent = option?.dataset.credits || "—";
+      refreshCourseAvailability();
+    });
+  });
+</script>
+{% endblock %}

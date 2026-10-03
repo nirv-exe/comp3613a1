@@ -1,0 +1,76 @@
+{% extends "authenticated-base.html" %}
+{% block title %}Degree progress{% endblock %}
+
+{% block subpage_content %}
+<div class="container-fluid py-2">
+  <div class="mb-4">
+    <p class="text-uppercase small fw-semibold text-primary mb-1">Track degree progress</p>
+    <h1 class="h3 mb-1">Your academic overview</h1>
+    <p class="text-muted mb-0">Review completed credits and the courses contributing to your degree.</p>
+  </div>
+
+  <div class="row g-3 mb-4">
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <p class="text-muted mb-2">Credits completed</p>
+          <p class="display-6 fw-semibold mb-0">{{ progress.completed_credits }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <p class="text-muted mb-2">Credits remaining</p>
+          <p class="display-6 fw-semibold mb-0">{{ progress.remaining_credits }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card border-0 shadow-sm h-100">
+        <div class="card-body">
+          <p class="text-muted mb-2">Progress toward degree</p>
+          <p class="display-6 fw-semibold mb-0">
+            {{ ((progress.completed_credits / progress.target_credits) * 100)|round|int }}%
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="card border-0 shadow-sm">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h5 mb-0">Completed courses</h2>
+        <span class="badge rounded-pill text-bg-light">{{ progress.completed_courses|length }} courses</span>
+      </div>
+      {% if progress.completed_courses %}
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Course</th>
+              <th>Course name</th>
+              <th>Semester</th>
+              <th class="text-end">Credits</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for course in progress.completed_courses %}
+            <tr>
+              <td class="fw-semibold">{{ course.code }}</td>
+              <td>{{ course.name }}</td>
+              <td>{{ course.semester }}</td>
+              <td class="text-end">{{ course.credits }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <p class="text-muted mb-0">No completed courses have been recorded yet.</p>
+      {% endif %}
+    </div>
+  </section>
+</div>
+{% endblock %}
