@@ -276,7 +276,7 @@ note: Student completed a thin route that constructs AcademicRepository and Acad
 
 Phase 6. Public Render URL (not localhost). Markers open this to mark the three workflows.
 
-https://
+https://faststarter-fmz5.onrender.com/
 
 ## Logins
 
