@@ -33,22 +33,22 @@
                  name="target_credits" value="{{ user.target_credits }}" required>
           <div class="invalid-feedback" id="target_credits-feedback" hidden>Enter a positive target credit value.</div>
         </div>
-        <h2 class="h6 mb-3">Required courses</h2>
+        <h2 class="h6 mb-3">Required credits</h2>
         <div class="row g-3 mb-4">
           <div class="col-md-4">
-            <label class="form-label" for="required_core_courses">Core courses</label>
+            <label class="form-label" for="required_core_courses">Core credits</label>
             <input class="form-control" type="number" min="0" id="required_core_courses"
                    name="required_core_courses" value="{{ user.required_core_courses }}" required>
             <div class="invalid-feedback" id="required_core_courses-feedback" hidden>Enter zero or more.</div>
           </div>
           <div class="col-md-4">
-            <label class="form-label" for="required_foundation_courses">Foundation courses</label>
+            <label class="form-label" for="required_foundation_courses">Foundation credits</label>
             <input class="form-control" type="number" min="0" id="required_foundation_courses"
                    name="required_foundation_courses" value="{{ user.required_foundation_courses }}" required>
             <div class="invalid-feedback" id="required_foundation_courses-feedback" hidden>Enter zero or more.</div>
           </div>
           <div class="col-md-4">
-            <label class="form-label" for="required_elective_courses">Elective courses</label>
+            <label class="form-label" for="required_elective_courses">Elective credits</label>
             <input class="form-control" type="number" min="0" id="required_elective_courses"
                    name="required_elective_courses" value="{{ user.required_elective_courses }}" required>
             <div class="invalid-feedback" id="required_elective_courses-feedback" hidden>Enter zero or more.</div>

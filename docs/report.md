@@ -204,6 +204,7 @@ One named workflow at a time. Include verify notes and polish / model revisions 
 - Authentication navigation polish: replaced the text Home arrow with the same square outlined back-button icon used throughout request detail screens.
 - Authentication layout polish: placed the back button and right-aligned MyAdvisor title on one row to reduce unnecessary modal height.
 - Final Phase 5 verification: student confirmed the implemented workflows, validation, authentication screens, profile requirements, advisor dashboard, request management, and navigation are working as expected.
+- Demo seed data: Bob's account is configured for a 93-credit degree with 18 core, 9 foundation, and 12 elective required credits. The seed creates five completed courses across semesters (15 completed credits) for the progress graph/history view, plus a submitted three-course semester plan for the advisor demo. Category progress is calculated in credits.
 - Student profile workflow: students can update degree name, degree level, and target credits through a protected profile page; dashboard and advisor request statistics use the saved academic details dynamically.
 - Student requirement tracking: profile settings now store required core, foundation, and elective course counts; outstanding statistics subtract completed courses by category for the selected student.
 - Student validation display fix: custom inline feedback now overrides Bootstrap visibility rules and runs before browser-native required-field handling.

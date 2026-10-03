@@ -47,13 +47,14 @@ def cmd_init(args: argparse.Namespace) -> None:
 
 
 def cmd_seed(args: argparse.Namespace) -> None:
-    """Insert demo users.
+    """Insert demo users and representative academic data."""
+    from datetime import date
 
-    bob / bobpass       (regular_user)
-    admin / adminpass   (admin)
-    """
+    from sqlmodel import select
+
     from app.database import ensure_db_and_tables, get_cli_session
-    from app.models.academic import Course
+    from app.models.academic import Course, CourseHistory, PlanItem, SemesterPlan
+    from app.models.user import User
     from app.repositories.user import UserRepository
     from app.schemas.user import AdminCreate, RegularUserCreate
     from app.utilities.security import encrypt_password
@@ -73,12 +74,6 @@ def cmd_seed(args: argparse.Namespace) -> None:
         for username, email, password, role, degree_name in demo_users:
             existing_user = repo.get_by_username(username)
             if existing_user:
-                if not existing_user.degree_name and degree_name:
-                    existing_user.degree_name = degree_name
-                if not existing_user.degree_level:
-                    existing_user.degree_level = "Level 1"
-                    session.add(existing_user)
-                    session.commit()
                 print(f"  skip  {username} (already exists)")
                 skipped += 1
                 continue
@@ -102,6 +97,9 @@ def cmd_seed(args: argparse.Namespace) -> None:
             ("COMP 2200", "Database Systems", 3, "Core"),
             ("MATH 1200", "Discrete Mathematics", 3, "Foundation"),
             ("STAT 1000", "Introductory Statistics", 3, "Elective"),
+            ("COMP 3000", "Algorithms", 3, "Core"),
+            ("COMP 3100", "Software Engineering", 3, "Core"),
+            ("MATH 2200", "Applied Mathematics", 3, "Elective"),
         ]
         for code, name, credits, course_type in demo_courses:
             if session.get(Course, code) is None:
@@ -115,9 +113,69 @@ def cmd_seed(args: argparse.Namespace) -> None:
                 )
         session.commit()
 
+        bob = session.exec(select(User).where(User.username == "bob")).first()
+        admin = session.exec(select(User).where(User.username == "admin")).first()
+        if bob is not None:
+            bob.degree_name = "BSc Computer Science"
+            bob.degree_level = "Level 1"
+            bob.target_credits = 93
+            bob.required_core_courses = 18
+            bob.required_foundation_courses = 9
+            bob.required_elective_courses = 12
+            session.add(bob)
+
+            history_rows = [
+                ("COMP 0000", "Year 1 Semester 1"),
+                ("COMP 2100", "Year 1 Semester 2"),
+                ("COMP 2200", "Year 2 Semester 1"),
+                ("MATH 1200", "Year 1 Semester 1"),
+                ("STAT 1000", "Year 2 Semester 1"),
+            ]
+            for course_code, semester in history_rows:
+                exists = session.exec(
+                    select(CourseHistory).where(
+                        CourseHistory.student_id == bob.id,
+                        CourseHistory.course_code == course_code,
+                    )
+                ).first()
+                if exists is None:
+                    session.add(
+                        CourseHistory(
+                            course_code=course_code,
+                            student_id=bob.id,
+                            semester_taken=semester,
+                            credits_earned=3,
+                        )
+                    )
+
+            if not session.exec(
+                select(SemesterPlan).where(SemesterPlan.student_id == bob.id)
+            ).first():
+                plan = SemesterPlan(
+                    student_id=bob.id,
+                    advisor_id=admin.id if admin else None,
+                    submitted_student_id="816000001",
+                    semester="Year 2 Semester 2",
+                    status="submitted",
+                    submission_date=date.today(),
+                    student_notes="Please review my next semester course selections.",
+                )
+                session.add(plan)
+                session.flush()
+                for order, course_code in enumerate(
+                    ("COMP 3000", "COMP 3100", "MATH 2200"), start=1
+                ):
+                    session.add(
+                        PlanItem(
+                            plan_id=plan.plan_id,
+                            course_code=course_code,
+                            course_order=order,
+                        )
+                    )
+            session.commit()
+
     print(f"Seed done — created {created}, skipped {skipped}.")
     print("Login with bob/bobpass or admin/adminpass")
-
 
 def cmd_run(args: argparse.Namespace) -> None:
     """Start the FastAPI app with Uvicorn."""

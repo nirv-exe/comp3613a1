@@ -52,9 +52,9 @@
           <h2 class="h6">Student Outstanding Requirements</h2>
           <div class="requirements-grid">
             <div><strong>{{ progress.remaining_credits }}</strong><span>credits</span></div>
-            <div><strong>{{ progress.outstanding_requirements.core_courses }}</strong><span>core courses</span></div>
-            <div><strong>{{ progress.outstanding_requirements.elective_courses }}</strong><span>electives</span></div>
-            <div><strong>{{ progress.outstanding_requirements.foundation_courses }}</strong><span>foundation courses</span></div>
+            <div><strong>{{ progress.outstanding_requirements.core_courses }}</strong><span>core credits</span></div>
+            <div><strong>{{ progress.outstanding_requirements.elective_courses }}</strong><span>elective credits</span></div>
+            <div><strong>{{ progress.outstanding_requirements.foundation_courses }}</strong><span>foundation credits</span></div>
           </div>
         </div>
         {% if plan.status == "submitted" %}

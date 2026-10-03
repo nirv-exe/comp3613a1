@@ -32,24 +32,27 @@ class AcademicRepository:
             "core_courses": max(
                 (student.required_core_courses if student else 0)
                 - sum(
-                    course.course_type.strip().lower() == "core"
-                    for _, course in history
+                    history_item.credits_earned
+                    for history_item, course in history
+                    if course.course_type.strip().lower() == "core"
                 ),
                 0,
             ),
             "elective_courses": max(
                 (student.required_elective_courses if student else 0)
                 - sum(
-                    course.course_type.strip().lower() == "elective"
-                    for _, course in history
+                    history_item.credits_earned
+                    for history_item, course in history
+                    if course.course_type.strip().lower() == "elective"
                 ),
                 0,
             ),
             "foundation_courses": max(
                 (student.required_foundation_courses if student else 0)
                 - sum(
-                    course.course_type.strip().lower() == "foundation"
-                    for _, course in history
+                    history_item.credits_earned
+                    for history_item, course in history
+                    if course.course_type.strip().lower() == "foundation"
                 ),
                 0,
             ),
