@@ -124,54 +124,56 @@ def cmd_seed(args: argparse.Namespace) -> None:
             bob.required_elective_courses = 12
             session.add(bob)
 
+            for existing_plan in session.exec(
+                select(SemesterPlan).where(SemesterPlan.student_id == bob.id)
+            ).all():
+                for item in session.exec(
+                    select(PlanItem).where(PlanItem.plan_id == existing_plan.plan_id)
+                ).all():
+                    session.delete(item)
+                session.delete(existing_plan)
+            for existing_history in session.exec(
+                select(CourseHistory).where(CourseHistory.student_id == bob.id)
+            ).all():
+                session.delete(existing_history)
+            session.flush()
+
             history_rows = [
                 ("COMP 0000", "Year 1 Semester 1"),
-                ("COMP 2100", "Year 1 Semester 2"),
-                ("COMP 2200", "Year 2 Semester 1"),
                 ("MATH 1200", "Year 1 Semester 1"),
-                ("STAT 1000", "Year 2 Semester 1"),
+                ("COMP 2100", "Year 1 Semester 2"),
             ]
             for course_code, semester in history_rows:
-                exists = session.exec(
-                    select(CourseHistory).where(
-                        CourseHistory.student_id == bob.id,
-                        CourseHistory.course_code == course_code,
+                session.add(
+                    CourseHistory(
+                        course_code=course_code,
+                        student_id=bob.id,
+                        semester_taken=semester,
+                        credits_earned=3,
                     )
-                ).first()
-                if exists is None:
-                    session.add(
-                        CourseHistory(
-                            course_code=course_code,
-                            student_id=bob.id,
-                            semester_taken=semester,
-                            credits_earned=3,
-                        )
-                    )
-
-            if not session.exec(
-                select(SemesterPlan).where(SemesterPlan.student_id == bob.id)
-            ).first():
-                plan = SemesterPlan(
-                    student_id=bob.id,
-                    advisor_id=admin.id if admin else None,
-                    submitted_student_id="816000001",
-                    semester="Year 2 Semester 2",
-                    status="submitted",
-                    submission_date=date.today(),
-                    student_notes="Please review my next semester course selections.",
                 )
-                session.add(plan)
-                session.flush()
-                for order, course_code in enumerate(
-                    ("COMP 3000", "COMP 3100", "MATH 2200"), start=1
-                ):
-                    session.add(
-                        PlanItem(
-                            plan_id=plan.plan_id,
-                            course_code=course_code,
-                            course_order=order,
-                        )
+
+            plan = SemesterPlan(
+                student_id=bob.id,
+                advisor_id=admin.id if admin else None,
+                submitted_student_id="816000001",
+                semester="Year 1 Semester 2",
+                status="submitted",
+                submission_date=date.today(),
+                student_notes="Please review my next semester course selections.",
+            )
+            session.add(plan)
+            session.flush()
+            for order, course_code in enumerate(
+                ("COMP 2200", "STAT 1000", "MATH 2200"), start=1
+            ):
+                session.add(
+                    PlanItem(
+                        plan_id=plan.plan_id,
+                        course_code=course_code,
+                        course_order=order,
                     )
+                )
             session.commit()
 
     print(f"Seed done — created {created}, skipped {skipped}.")
