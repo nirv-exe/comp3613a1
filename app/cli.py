@@ -48,7 +48,7 @@ def cmd_init(args: argparse.Namespace) -> None:
 
 def cmd_seed(args: argparse.Namespace) -> None:
     """Insert demo users and representative academic data."""
-    from datetime import date
+    from datetime import date, timedelta
 
     from sqlmodel import select
 
@@ -95,8 +95,22 @@ def cmd_seed(args: argparse.Namespace) -> None:
             ("COMP 0000", "Intro to Computing", 3, "Core"),
             ("COMP 2100", "Data Structures", 3, "Core"),
             ("COMP 2200", "Database Systems", 3, "Core"),
+            ("COMP 2300", "Computer Architecture", 3, "Core"),
+            ("COMP 2400", "Programming Methods", 3, "Core"),
+            ("COMP 2500", "Web Development", 3, "Core"),
+            ("COMP 2600", "Operating Systems", 3, "Core"),
+            ("COMP 2700", "Computer Networks", 3, "Core"),
             ("MATH 1200", "Discrete Mathematics", 3, "Foundation"),
+            ("MATH 1300", "Calculus I", 3, "Foundation"),
+            ("MATH 1400", "Linear Algebra", 3, "Foundation"),
+            ("MATH 1500", "Probability", 3, "Foundation"),
+            ("MATH 1600", "Statistics", 3, "Foundation"),
             ("STAT 1000", "Introductory Statistics", 3, "Elective"),
+            ("INFO 1000", "Information Literacy", 3, "Elective"),
+            ("ECON 1000", "Economics for Computing", 3, "Elective"),
+            ("COMM 1000", "Technical Communication", 3, "Elective"),
+            ("BUSI 1000", "Entrepreneurship", 3, "Elective"),
+            ("PHYS 1000", "Physics for Computing", 3, "Elective"),
             ("COMP 3000", "Algorithms", 3, "Core"),
             ("COMP 3100", "Software Engineering", 3, "Core"),
             ("MATH 2200", "Applied Mathematics", 3, "Elective"),
@@ -140,8 +154,24 @@ def cmd_seed(args: argparse.Namespace) -> None:
 
             history_rows = [
                 ("COMP 0000", "Year 1 Semester 1"),
+                ("COMP 2100", "Year 1 Semester 1"),
+                ("COMP 2300", "Year 1 Semester 1"),
+                ("COMP 2400", "Year 1 Semester 1"),
                 ("MATH 1200", "Year 1 Semester 1"),
-                ("COMP 2100", "Year 1 Semester 2"),
+                ("MATH 1300", "Year 1 Semester 1"),
+                ("MATH 1400", "Year 1 Semester 1"),
+                ("STAT 1000", "Year 1 Semester 1"),
+                ("INFO 1000", "Year 1 Semester 1"),
+                ("COMP 2200", "Year 1 Semester 2"),
+                ("COMP 2500", "Year 1 Semester 2"),
+                ("COMP 2600", "Year 1 Semester 2"),
+                ("COMP 2700", "Year 1 Semester 2"),
+                ("MATH 1500", "Year 1 Semester 2"),
+                ("MATH 1600", "Year 1 Semester 2"),
+                ("ECON 1000", "Year 1 Semester 2"),
+                ("COMM 1000", "Year 1 Semester 2"),
+                ("BUSI 1000", "Year 1 Semester 2"),
+                ("PHYS 1000", "Year 1 Semester 2"),
             ]
             for course_code, semester in history_rows:
                 session.add(
@@ -153,27 +183,69 @@ def cmd_seed(args: argparse.Namespace) -> None:
                     )
                 )
 
-            plan = SemesterPlan(
-                student_id=bob.id,
-                advisor_id=admin.id if admin else None,
-                submitted_student_id="816000001",
-                semester="Year 1 Semester 2",
-                status="submitted",
-                submission_date=date.today(),
-                student_notes="Please review my next semester course selections.",
-            )
-            session.add(plan)
-            session.flush()
-            for order, course_code in enumerate(
-                ("COMP 2200", "STAT 1000", "MATH 2200"), start=1
-            ):
-                session.add(
-                    PlanItem(
-                        plan_id=plan.plan_id,
-                        course_code=course_code,
-                        course_order=order,
-                    )
+            demo_plans = [
+                (
+                    "Year 1 Semester 2",
+                    "submitted",
+                    date.today(),
+                    None,
+                    "Please review my next semester course selections.",
+                    ("COMP 3000", "COMP 3100", "MATH 2200"),
+                ),
+                (
+                    "Year 1 Semester 1",
+                    "approved",
+                    date.today() - timedelta(days=75),
+                    "Approved — course load meets the requirements.",
+                    "Approved course selection from the first semester.",
+                    ("COMP 0000", "MATH 1200", "STAT 1000"),
+                ),
+                (
+                    "Summer Session",
+                    "approved",
+                    date.today() - timedelta(days=145),
+                    "Approved for the accelerated summer schedule.",
+                    "Summer course request.",
+                    ("INFO 1000", "COMM 1000"),
+                ),
+                (
+                    "Year 1 Semester 1",
+                    "rejected",
+                    date.today() - timedelta(days=210),
+                    "Reduce the course load and replace the duplicate elective.",
+                    "Initial plan submitted for review.",
+                    ("COMP 2300", "COMP 2400", "ECON 1000", "MATH 2200"),
+                ),
+                (
+                    "Orientation Term",
+                    "cancelled",
+                    date.today() - timedelta(days=280),
+                    "Request cancelled by student before review.",
+                    "Draft request no longer needed.",
+                    ("COMP 2500", "MATH 1300"),
+                ),
+            ]
+            for semester, status, submitted, feedback, notes, course_codes in demo_plans:
+                plan = SemesterPlan(
+                    student_id=bob.id,
+                    advisor_id=admin.id if admin else None,
+                    submitted_student_id="816000001",
+                    semester=semester,
+                    status=status,
+                    submission_date=submitted,
+                    advisor_feedback=feedback,
+                    student_notes=notes,
                 )
+                session.add(plan)
+                session.flush()
+                for order, course_code in enumerate(course_codes, start=1):
+                    session.add(
+                        PlanItem(
+                            plan_id=plan.plan_id,
+                            course_code=course_code,
+                            course_order=order,
+                        )
+                    )
             session.commit()
 
     print(f"Seed done — created {created}, skipped {skipped}.")

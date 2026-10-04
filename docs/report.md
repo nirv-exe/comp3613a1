@@ -1,3 +1,10 @@
+<!-- student-build:skill-integrity
+status: pass
+root: e84cd692d0b85eefe546385661958c27d07e8be6c5176a82012f68ccff5c8beb
+expected_root: e84cd692d0b85eefe546385661958c27d07e8be6c5176a82012f68ccff5c8beb
+mismatches: none
+-->
+
 # COMP 3613 Assignment 1
 
 Draft this file with the Guide. **Update it after every phase milestone** before you pause. The use-case diagram is a UML PNG at `docs/diagrams/use-case.png`, linked from this file as `diagrams/use-case.png` (path relative to `docs/report.md`). The model diagram is Mermaid. **Embed wireframe images** as `wireframes/<file>` (files live in `docs/wireframes/`).
@@ -204,7 +211,7 @@ One named workflow at a time. Include verify notes and polish / model revisions 
 - Authentication navigation polish: replaced the text Home arrow with the same square outlined back-button icon used throughout request detail screens.
 - Authentication layout polish: placed the back button and right-aligned MyAdvisor title on one row to reduce unnecessary modal height.
 - Final Phase 5 verification: student confirmed the implemented workflows, validation, authentication screens, profile requirements, advisor dashboard, request management, and navigation are working as expected.
-- Demo seed data: Bob's Level 1 account is configured for a 93-credit degree with 18 core, 9 foundation, and 12 elective required credits. The seed creates three completed Year 1 courses (9 completed credits) for the progress graph/history view, plus a submitted Year 1 Semester 2 three-course plan for the advisor demo. Category progress is calculated in credits, and the seed refreshes Bob's demo history and plan so reruns remain consistent.
+- Demo seed data: Bob's Level 1 account is configured for a 93-credit degree with 18 core, 9 foundation, and 12 elective required credits. The seed creates nineteen completed Year 1 courses (57 completed credits, over 60% of the degree) for the progress graph/history view, plus one current submitted request and four older approved, rejected, and cancelled requests. Category progress is calculated in credits, and the seed refreshes Bob's demo history and requests so reruns remain consistent.
 - Student profile workflow: students can update degree name, degree level, and target credits through a protected profile page; dashboard and advisor request statistics use the saved academic details dynamically.
 - Student requirement tracking: profile settings now store required core, foundation, and elective course counts; outstanding statistics subtract completed courses by category for the selected student.
 - Student validation display fix: custom inline feedback now overrides Bootstrap visibility rules and runs before browser-native required-field handling.
@@ -279,6 +286,14 @@ Phase 6. Public Render URL (not localhost). Markers open this to mark the three 
 
 https://faststarter-fmz5.onrender.com/
 
+### Latest deployment status
+
+- **Latest commit:** [`43bb3a4a6abe27998eba70ad09cf90e41b3f34e3`](https://github.com/nirv-exe/comp3613a1/commit/43bb3a4a6abe27998eba70ad09cf90e41b3f34e3) — `Align Level 1 demo seed data`
+- **Deployment status:** Successful
+- **Health check:** `https://faststarter-fmz5.onrender.com/health` returned `{"ok":true}`
+- **Render web service:** Live
+- **Render database:** Available
+
 ## Logins
 
 Every account a marker needs, including extra users you added. Starter accounts:
@@ -290,12 +305,108 @@ Every account a marker needs, including extra users you added. Starter accounts:
 
 ## Session transcripts
 
-Filled when the Guide builds the report: the agent writes each Guide chat to `docs/transcripts/<slug>.md` (Copilot Agent, Cursor, or OpenCode). `python manage.py report` packages them. Do not paste chats here during the build.
+Filled when the Guide builds the report: the agent writes chat markdown into `docs/transcripts/`; `python manage.py report` packages them.
+
+Guide packaged **7** chat(s) in `docs/transcripts/` (and `docs/transcripts.zip`).
+
+Index: [docs/transcripts/INDEX.md](transcripts/INDEX.md)
+
+- [`phase-1-project`](transcripts/phase-1-project.md)
+- [`phase-2-use-cases`](transcripts/phase-2-use-cases.md)
+- [`phase-3-model`](transcripts/phase-3-model.md)
+- [`phase-4-wireframe`](transcripts/phase-4-wireframe.md)
+- [`phase-5-implement`](transcripts/phase-5-implement.md)
+- [`phase-6-deploy`](transcripts/phase-6-deploy.md)
+- [`render-tools`](transcripts/render-tools.md)
 
 ## Competency (student-judge)
 
-Filled when the report is built. Guide runs student-judge, writes `docs/judge.md`, and export appends the scorecard here.
+Filled by Guide from the student-judge run when this report was built.
+
+**Judged at:** 2026-10-04T16:17:38-04:00  
+**Evidence pass:** re-read native Copilot Guide chats for Phases 1–6 and Render tooling, current `docs/report.md`, diagrams, wireframe, routers, and transcript markdown; prior judge ignored.
+
+**Student / session:** Nirav / `comp3613a1`  
+**Artifact:** Guide chats for this project (Copilot Agent) and the Guide-written `docs/transcripts` dump  
+**Phases in evidence:** 1–6 (COMP 3613; Phase 5 polish, Phase 6 deploy; never generic 0–5)
+
+### Totals
+
+| | Count / value |
+|--|--|
+| Metrics on rubric | 12 (M1–M12) |
+| N/A (excluded) | 0 |
+| Metrics scored | 12 |
+| Scoreable max | 48 |
+| Awarded total | 46 / 48 |
+| **Overall (avg of scored)** | **3.8 / 4** |
+| Impression mark | 18 / 20 |
+
+## Scorecard
+
+| ID | Metric | Score / 4 | In avg | Evidence |
+|----|--------|----------:|:------:|----------|
+| M1 | Phase discipline | 4 | yes | The chats follow Phases 1–4 before implementation, then Phase 5 workflow slices and polish before Phase 6. The latest commit and successful deployment are now recorded. |
+| M2 | Problem framing | 4 | yes | Student selected MyAdvisor and named three `Feature (user)` workflows, then refined includes, extends, shared `View Submitted Plan`, entities, properties, and wireframe-implied requirements. |
+| M3 | Decision ownership | 4 | yes | The student explicitly added and removed use cases, requested the self-referential FK label, and challenged the first advisor design: “the design does not follow the wireframe. Also it shows no requests.” |
+| M4 | Artefact-before-code | 4 | yes | The report contains the UML PNG, Mermaid ERD, and embedded wireframe before the implementation notes; the implementation record says it followed the wireframe and accepted model revisions. |
+| M5 | Verification habit | 4 | yes | The report records final Phase 5 verification and repeated mismatch-driven fixes, including empty request data, validation, cancellation, navigation, chart behavior, and profile requirements. |
+| M6 | Assignment fit | 4 | yes | The shipped routers have no inline `select()`, `db.exec()`, `session.query`, or SQL filter matches; report evidence documents thin routes and service/repository delegation. The latest commit is recorded as successfully deployed. |
+| M7 | Slice explanation | 4 | yes | The report records student-completed SQLModel and thin-route checks for Track Degree Progress and Draft Semester Plan, plus a model check for Review and Approve Plan; all recorded checks have `architecture_ok: yes`. |
+| M8 | Prompt quality | 4 | yes | The student’s prompts are phase-tagged and concrete, including the use-case relationship edits and the wireframe mismatch request; later prompts efficiently steer specific polish corrections. |
+| M9 | Response to pushback | 4 | yes | The student did not accept the first build: they identified wireframe mismatch and missing requests, and the session continued through extensive UI, workflow, validation, and model polish. |
+| M10 | Integrity | 4 | yes | No laundering markers or edited-skill evidence were found; `manage.py skills-verify` returned `Skill integrity: pass`, and the student’s decisions remain consistent across the native chats and report. |
+| M11 | Provenance continuity | 4 | yes | The final implementation grows from the MyAdvisor workflows, named model, single wireframe, accepted lifecycle requirements, and later verification notes rather than an unrelated product. |
+| M12 | Sincerity trajectory | 4 | yes | No suspicion round was needed in the readable Guide chats; no `student-judge:sincerity` blocks were found, so the trajectory is clean with no abandonment. |
+
+## Strengths
+
+- Strong phase progression from student-owned workflows through UML, ERD, wireframe coverage, implementation, polish, and deployment.
+- Excellent response to visual and behavioral mismatches; the student repeatedly steered corrections instead of accepting the first build.
+- Architecture evidence is strong: recorded snippets passed and the final router search found no inline persistence queries.
+- The report captures meaningful domain rules: plan lifecycle, rejection/resubmission, prerequisite and duplicate validation, advisor feedback, progress calculation, and cancellation.
+- Skill integrity passed and the transcript set covers the native Copilot Guide chats available for this workspace.
+
+## Gaps (priority order)
+
+1. The report’s YouTube URL section is still empty if a video is required by the course submission checklist.
+2. The report’s YouTube URL section is still empty if a video is required by the course submission checklist.
+
+## Phase gate status
+
+| Phase | Status | Note |
+|-------|--------|------|
+| 1 | met | MyAdvisor and three named workflows recorded. |
+| 2 | met | UML use-case PNG includes student-owned include/extend/shared decisions. |
+| 3 | met | Mermaid ERD and self-referential Course FK correction recorded. |
+| 4 | met | Wireframe embedded and all three workflows marked covered. |
+| 5 | met | Theme, build, verification, UI/workflow/model polish, and architecture checks are recorded. |
+| 6 | met | Latest commit `43bb3a4a6abe27998eba70ad09cf90e41b3f34e3` is recorded, deployment is successful, and `/health` returned `{"ok":true}`. |
+
+## Recommended next practice
+
+- Reconfirm the deployed revision and database-backed request flow on the public URL, then record one concise marker walkthrough for Track Degree Progress, Draft Semester Plan, and Review and Approve Plan.
+
+## Integrity note
+
+- Clean — no external-assist suspicion was raised, and skill integrity passed.
+
+## Provenance flags
+
+- None.
+
+## Sincerity log summary
+
+- Blocks found: 0 | max round: 0 | min/mean/final confidence: not applicable | trend: clean | cleared: yes
+
+## Skips
+
+- Skips: 0/3 used. No assumptions were recorded as skips.
 
 ## Skill integrity
 
-Filled by `python manage.py report`. Do not edit the course skills.
+Course skills are hashed at export and compared to `.agents/skills.lock.json`. Do not edit `.agents/skills/`, `.cursor/skills/`, or `AGENTS.md`.
+
+- Status: **pass**
+- Root: `e84cd692d0b85eefe546385661958c27d07e8be6c5176a82012f68ccff5c8beb`
+- none
