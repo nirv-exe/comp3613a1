@@ -233,7 +233,7 @@ https://faststarter-fmz5.onrender.com/
 
 ### Latest deployment status
 
-- **Latest commit:** [`b1770d54322536204b15d62623ea274a1b2884c6`](https://github.com/nirv-exe/comp3613a1/commit/b1770d54322536204b15d62623ea274a1b2884c6) — `Expand academic demo seed data`
+- **Latest commit:** [`af1ee7c8212c94f27e594f6d5622d0b77c0bc93b`](https://github.com/nirv-exe/comp3613a1/commit/af1ee7c8212c94f27e594f6d5622d0b77c0bc93b) — `Final Commit`
 - **Deployment status:** Successful
 - **Health check:** `https://faststarter-fmz5.onrender.com/health` returned `{"ok":true}`
 - **Render web service:** Live
@@ -272,8 +272,8 @@ Index: [docs/transcripts/INDEX.md](transcripts/INDEX.md)
 
 Filled by Guide from the student-judge run when this report was built.
 
-**Judged at:** 2026-10-10T18:32:47-04:00  
-**Evidence pass:** freshly reviewed the nine Guide transcripts, current report, use-case and model diagrams, wireframe, Phase 5 code-check records, and current routers; prior scorecard ignored.
+**Judged at:** 2026-10-10T19:00:16-04:00  
+**Evidence pass:** freshly reviewed all nine packaged Guide transcripts, current `docs/report.md`, diagrams, wireframe, code-check records, and current routers; prior scorecard ignored.
 
 **Student / session:** Nirav / `comp3613a1`  
 **Artifact:** Copilot Guide transcripts and current project artefacts  
@@ -287,9 +287,9 @@ Filled by Guide from the student-judge run when this report was built.
 | N/A (excluded) | 0 |
 | Metrics scored | 12 |
 | Scoreable max | 48 |
-| Awarded total | 46 / 48 |
-| **Overall (avg of scored)** | **3.8 / 4** |
-| Impression mark | 19 / 20 |
+| Awarded total | 48 / 48 |
+| **Overall (avg of scored)** | **4.0 / 4** |
+| Impression mark | 20 / 20 |
 
 ## Scorecard
 
@@ -313,7 +313,7 @@ Filled by Guide from the student-judge run when this report was built.
 - Student-owned project, workflows, design decisions, wireframe, and iterative polish are traceable across the phase transcripts.
 - Student identified concrete wireframe and empty-data mismatches and continued steering the fixes.
 - The report records architecture-respecting code checks and a successful deployment.
-- A demonstration video is now linked in the report.
+- The report contains the demonstration video, final ERD image, and all nine session transcripts in its PDF appendix.
 
 ## Gaps (priority order)
 
@@ -325,14 +325,14 @@ Filled by Guide from the student-judge run when this report was built.
 |-------|--------|------|
 | 1 | met | MyAdvisor and three named workflows are recorded. |
 | 2 | met | UML use cases include student-owned relationship and sharing decisions. |
-| 3 | met | Mermaid ERD and self-referential Course FK correction are recorded. |
+| 3 | met | Mermaid ERD source and final model image are included. |
 | 4 | met | Wireframe is embedded and all three workflows are marked covered. |
 | 5 | met | Theme, implementation, verification, code checks, and sustained polish are recorded. |
-| 6 | met | Public Render URL, marker logins, and successful health check are recorded. |
+| 6 | met | Public Render URL, marker logins, successful health check, and current repository commit are recorded. |
 
 ## Recommended next practice
 
-- Keep a concise record of future deployment and presentation changes alongside the submission artefacts.
+- Keep the deployed service aligned with the final commit and retain the PDF and transcript archive with the submission.
 
 ## Integrity note
 
