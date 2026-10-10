@@ -1,0 +1,54 @@
+erDiagram
+  User {
+    int userID PK
+    string name
+    string email
+    string role
+    string degreeName
+    string degreeLevel
+    int targetCredits
+    int requiredCoreCourses
+    int requiredFoundationCourses
+    int requiredElectiveCourses
+  }
+
+  Course {
+    string courseCode PK
+    string courseName
+    int creditAmt
+    string preReqCode FK
+    string courseType
+  }
+
+  CourseHistory {
+    int historyID PK
+    string courseCode FK
+    int studentID FK
+    string semesterTaken
+    int creditsEarned
+  }
+
+  SemesterPlan {
+    int planID PK
+    int studentID FK
+    int advisorID FK
+    string semester
+    string status
+    string advisorFeedback
+    date submissionDate
+    string studentNotes
+  }
+
+  PlanItem {
+    int itemID PK
+    int planID FK
+    string courseCode FK
+  }
+
+  User ||--o{ CourseHistory : records
+  User ||--o{ SemesterPlan : submits
+  User ||--o{ SemesterPlan : reviews
+  Course ||--o{ CourseHistory : appears_in
+  Course ||--o{ PlanItem : includes
+  SemesterPlan ||--o{ PlanItem : contains
+  Course ||--o| Course : has_prereq

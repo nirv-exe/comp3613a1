@@ -1,0 +1,70 @@
+{
+  "system": "MyAdvisor",
+  "actors": [
+    {
+      "name": "Student",
+      "side": "left"
+    },
+    {
+      "name": "Advisor",
+      "side": "right"
+    }
+  ],
+  "use_cases": [
+    {
+      "name": "Track Degree Progress",
+      "actors": [
+        "Student"
+      ]
+    },
+    {
+      "name": "Update Academic Profile",
+      "actors": [
+        "Student"
+      ],
+      "includes": [
+        "Set Degree Requirements"
+      ]
+    },
+    {
+      "name": "Set Degree Requirements"
+    },
+    {
+      "name": "View Course History",
+      "extends": [
+        "Track Degree Progress"
+      ]
+    },
+    {
+      "name": "Draft Semester Plan",
+      "actors": [
+        "Student"
+      ],
+      "includes": [
+        "Submit Plan"
+      ]
+    },
+    {
+      "name": "Submit Plan"
+    },
+    {
+      "name": "View Submitted Plan",
+      "actors": [
+        "Student",
+        "Advisor"
+      ]
+    },
+    {
+      "name": "Review and Approve Plan",
+      "actors": [
+        "Advisor"
+      ],
+      "includes": [
+        "Provide Feedback"
+      ]
+    },
+    {
+      "name": "Provide Feedback"
+    }
+  ]
+}

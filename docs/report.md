@@ -37,66 +37,11 @@ Submitted Plan is shared by Student and Advisor.
 
 ## Model diagram
 
-First draft. Update this section in Phase 5 when polish revises the model, and note what changed.
+The ER diagram reflects the final Phase 5 model revisions. The Mermaid source is available in [model.mmd](diagrams/model.mmd).
 
 Assumes the app uses a single `User` table for both students and advisors, distinguished by the `role` field. `SemesterPlan` is owned by a student and may be reviewed by an advisor; `CourseHistory` stores each course completed by a student; `PlanItem` links a plan to a selected course.
 
-```mermaid
-erDiagram
-  User {
-    int userID PK
-    string name
-    string email
-    string role
-    string degreeName
-    string degreeLevel
-    int targetCredits
-    int requiredCoreCourses
-    int requiredFoundationCourses
-    int requiredElectiveCourses
-  }
-
-  Course {
-    string courseCode PK
-    string courseName
-    int creditAmt
-    string preReqCode FK
-    string courseType
-  }
-
-  CourseHistory {
-    int historyID PK
-    string courseCode FK
-    int studentID FK
-    string semesterTaken
-    int creditsEarned
-  }
-
-  SemesterPlan {
-    int planID PK
-    int studentID FK
-    int advisorID FK
-    string semester
-    string status
-    string advisorFeedback
-    date submissionDate
-    string studentNotes
-  }
-
-  PlanItem {
-    int itemID PK
-    int planID FK
-    string courseCode FK
-  }
-
-  User ||--o{ CourseHistory : records
-  User ||--o{ SemesterPlan : submits
-  User ||--o{ SemesterPlan : reviews
-  Course ||--o{ CourseHistory : appears_in
-  Course ||--o{ PlanItem : includes
-  SemesterPlan ||--o{ PlanItem : contains
-  Course ||--o| Course : has_prereq
-```
+![MyAdvisor entity relationship diagram](diagrams/model.png)
 
 ## Wireframes
 
@@ -288,7 +233,7 @@ https://faststarter-fmz5.onrender.com/
 
 ### Latest deployment status
 
-- **Latest commit:** [`43bb3a4a6abe27998eba70ad09cf90e41b3f34e3`](https://github.com/nirv-exe/comp3613a1/commit/43bb3a4a6abe27998eba70ad09cf90e41b3f34e3) — `Align Level 1 demo seed data`
+- **Latest commit:** [`b1770d54322536204b15d62623ea274a1b2884c6`](https://github.com/nirv-exe/comp3613a1/commit/b1770d54322536204b15d62623ea274a1b2884c6) — `Expand academic demo seed data`
 - **Deployment status:** Successful
 - **Health check:** `https://faststarter-fmz5.onrender.com/health` returned `{"ok":true}`
 - **Render web service:** Live
@@ -303,11 +248,13 @@ Every account a marker needs, including extra users you added. Starter accounts:
 
 ## YouTube URL
 
+[Demonstration video](https://youtu.be/pwO2xXZIhiA)
+
 ## Session transcripts
 
-Filled when the Guide builds the report: the agent writes chat markdown into `docs/transcripts/`; `python manage.py report` packages them.
+The full chat transcripts are included in the PDF appendix. The source files are also packaged in [transcripts.zip](transcripts.zip) and listed below.
 
-Guide packaged **7** chat(s) in `docs/transcripts/` (and `docs/transcripts.zip`).
+Guide packaged **9** chat(s) in `docs/transcripts/` (and `docs/transcripts.zip`).
 
 Index: [docs/transcripts/INDEX.md](transcripts/INDEX.md)
 
@@ -316,19 +263,21 @@ Index: [docs/transcripts/INDEX.md](transcripts/INDEX.md)
 - [`phase-3-model`](transcripts/phase-3-model.md)
 - [`phase-4-wireframe`](transcripts/phase-4-wireframe.md)
 - [`phase-5-implement`](transcripts/phase-5-implement.md)
+- [`phase-6-deploy-antigravity`](transcripts/phase-6-deploy-antigravity.md)
 - [`phase-6-deploy`](transcripts/phase-6-deploy.md)
+- [`render-to-antigravity`](transcripts/render-to-antigravity.md)
 - [`render-tools`](transcripts/render-tools.md)
 
 ## Competency (student-judge)
 
 Filled by Guide from the student-judge run when this report was built.
 
-**Judged at:** 2026-10-04T16:17:38-04:00  
-**Evidence pass:** re-read native Copilot Guide chats for Phases 1–6 and Render tooling, current `docs/report.md`, diagrams, wireframe, routers, and transcript markdown; prior judge ignored.
+**Judged at:** 2026-10-10T18:32:47-04:00  
+**Evidence pass:** freshly reviewed the nine Guide transcripts, current report, use-case and model diagrams, wireframe, Phase 5 code-check records, and current routers; prior scorecard ignored.
 
 **Student / session:** Nirav / `comp3613a1`  
-**Artifact:** Guide chats for this project (Copilot Agent) and the Guide-written `docs/transcripts` dump  
-**Phases in evidence:** 1–6 (COMP 3613; Phase 5 polish, Phase 6 deploy; never generic 0–5)
+**Artifact:** Copilot Guide transcripts and current project artefacts  
+**Phases in evidence:** 1–6 (COMP 3613; Phase 5 polish, Phase 6 deploy)
 
 ### Totals
 
@@ -340,56 +289,54 @@ Filled by Guide from the student-judge run when this report was built.
 | Scoreable max | 48 |
 | Awarded total | 46 / 48 |
 | **Overall (avg of scored)** | **3.8 / 4** |
-| Impression mark | 18 / 20 |
+| Impression mark | 19 / 20 |
 
 ## Scorecard
 
 | ID | Metric | Score / 4 | In avg | Evidence |
 |----|--------|----------:|:------:|----------|
-| M1 | Phase discipline | 4 | yes | The chats follow Phases 1–4 before implementation, then Phase 5 workflow slices and polish before Phase 6. The latest commit and successful deployment are now recorded. |
-| M2 | Problem framing | 4 | yes | Student selected MyAdvisor and named three `Feature (user)` workflows, then refined includes, extends, shared `View Submitted Plan`, entities, properties, and wireframe-implied requirements. |
-| M3 | Decision ownership | 4 | yes | The student explicitly added and removed use cases, requested the self-referential FK label, and challenged the first advisor design: “the design does not follow the wireframe. Also it shows no requests.” |
-| M4 | Artefact-before-code | 4 | yes | The report contains the UML PNG, Mermaid ERD, and embedded wireframe before the implementation notes; the implementation record says it followed the wireframe and accepted model revisions. |
-| M5 | Verification habit | 4 | yes | The report records final Phase 5 verification and repeated mismatch-driven fixes, including empty request data, validation, cancellation, navigation, chart behavior, and profile requirements. |
-| M6 | Assignment fit | 4 | yes | The shipped routers have no inline `select()`, `db.exec()`, `session.query`, or SQL filter matches; report evidence documents thin routes and service/repository delegation. The latest commit is recorded as successfully deployed. |
-| M7 | Slice explanation | 4 | yes | The report records student-completed SQLModel and thin-route checks for Track Degree Progress and Draft Semester Plan, plus a model check for Review and Approve Plan; all recorded checks have `architecture_ok: yes`. |
-| M8 | Prompt quality | 4 | yes | The student’s prompts are phase-tagged and concrete, including the use-case relationship edits and the wireframe mismatch request; later prompts efficiently steer specific polish corrections. |
-| M9 | Response to pushback | 4 | yes | The student did not accept the first build: they identified wireframe mismatch and missing requests, and the session continued through extensive UI, workflow, validation, and model polish. |
-| M10 | Integrity | 4 | yes | No laundering markers or edited-skill evidence were found; `manage.py skills-verify` returned `Skill integrity: pass`, and the student’s decisions remain consistent across the native chats and report. |
-| M11 | Provenance continuity | 4 | yes | The final implementation grows from the MyAdvisor workflows, named model, single wireframe, accepted lifecycle requirements, and later verification notes rather than an unrelated product. |
-| M12 | Sincerity trajectory | 4 | yes | No suspicion round was needed in the readable Guide chats; no `student-judge:sincerity` blocks were found, so the trajectory is clean with no abandonment. |
+| M1 | Phase discipline | 4 | yes | The nine transcripts show the sequence through Phases 1–6, with Phase 5 polish before the deployment record. |
+| M2 | Problem framing | 4 | yes | Student-selected MyAdvisor workflows, use-case edits, named model, relationship correction, and wireframe requirements are recorded across the phase transcripts and report. |
+| M3 | Decision ownership | 4 | yes | Student added and removed use cases, requested the self-reference FK correction, and challenged the first advisor page for failing to match the wireframe and show requests. |
+| M4 | Artefact-before-code | 4 | yes | The report contains the UML diagram, student-named ERD, and wireframe; Phase 5 notes tie implementation to these artefacts. |
+| M5 | Verification habit | 4 | yes | Phase 5 transcript records student mismatch reports and repeated UI, workflow, validation, and model refinements before final verification. |
+| M6 | Assignment fit | 4 | yes | Current routers delegate persistence through service/repository layers; implementation notes and deployment evidence match the assignment architecture. |
+| M7 | Slice explanation | 4 | yes | Current report records student-completed SQLModel and thin-route checks for Track Degree Progress and Draft Semester Plan, plus a model check for Review and Approve Plan. |
+| M8 | Prompt quality | 4 | yes | Phase prompts, concrete diagram corrections, and specific implementation/polish requests are preserved in the transcripts. |
+| M9 | Response to pushback | 4 | yes | Student rejected mismatches and continued steering corrections through workflow, validation, and presentation polish. |
+| M10 | Integrity | 4 | yes | Current report records a passing skill-integrity check; the reviewed transcripts show no laundering markers. |
+| M11 | Provenance continuity | 4 | yes | The implementation and later polish follow the same MyAdvisor workflows, ERD, and wireframe throughout the transcripts and report. |
+| M12 | Sincerity trajectory | 4 | yes | No suspicion round or integrity concern appears in the packaged Guide transcripts. |
 
 ## Strengths
 
-- Strong phase progression from student-owned workflows through UML, ERD, wireframe coverage, implementation, polish, and deployment.
-- Excellent response to visual and behavioral mismatches; the student repeatedly steered corrections instead of accepting the first build.
-- Architecture evidence is strong: recorded snippets passed and the final router search found no inline persistence queries.
-- The report captures meaningful domain rules: plan lifecycle, rejection/resubmission, prerequisite and duplicate validation, advisor feedback, progress calculation, and cancellation.
-- Skill integrity passed and the transcript set covers the native Copilot Guide chats available for this workspace.
+- Student-owned project, workflows, design decisions, wireframe, and iterative polish are traceable across the phase transcripts.
+- Student identified concrete wireframe and empty-data mismatches and continued steering the fixes.
+- The report records architecture-respecting code checks and a successful deployment.
+- A demonstration video is now linked in the report.
 
 ## Gaps (priority order)
 
-1. The report’s YouTube URL section is still empty if a video is required by the course submission checklist.
-2. The report’s YouTube URL section is still empty if a video is required by the course submission checklist.
+- None found in the reviewed evidence.
 
 ## Phase gate status
 
 | Phase | Status | Note |
 |-------|--------|------|
-| 1 | met | MyAdvisor and three named workflows recorded. |
-| 2 | met | UML use-case PNG includes student-owned include/extend/shared decisions. |
-| 3 | met | Mermaid ERD and self-referential Course FK correction recorded. |
-| 4 | met | Wireframe embedded and all three workflows marked covered. |
-| 5 | met | Theme, build, verification, UI/workflow/model polish, and architecture checks are recorded. |
-| 6 | met | Latest commit `43bb3a4a6abe27998eba70ad09cf90e41b3f34e3` is recorded, deployment is successful, and `/health` returned `{"ok":true}`. |
+| 1 | met | MyAdvisor and three named workflows are recorded. |
+| 2 | met | UML use cases include student-owned relationship and sharing decisions. |
+| 3 | met | Mermaid ERD and self-referential Course FK correction are recorded. |
+| 4 | met | Wireframe is embedded and all three workflows are marked covered. |
+| 5 | met | Theme, implementation, verification, code checks, and sustained polish are recorded. |
+| 6 | met | Public Render URL, marker logins, and successful health check are recorded. |
 
 ## Recommended next practice
 
-- Reconfirm the deployed revision and database-backed request flow on the public URL, then record one concise marker walkthrough for Track Degree Progress, Draft Semester Plan, and Review and Approve Plan.
+- Keep a concise record of future deployment and presentation changes alongside the submission artefacts.
 
 ## Integrity note
 
-- Clean — no external-assist suspicion was raised, and skill integrity passed.
+- Clean — no external-assist suspicion was raised, and skill integrity is recorded as passing.
 
 ## Provenance flags
 
