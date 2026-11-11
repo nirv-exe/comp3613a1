@@ -214,15 +214,15 @@
   "variable": [
     {
       "key": "baseUrl",
-      "value": ""
+      "value": "http://localhost:5000"
     },
     {
       "key": "studentUsername",
-      "value": ""
+      "value": "bob"
     },
     {
       "key": "StudentPassword",
-      "value": ""
+      "value": "bobpass"
     }
   ]
 }
