@@ -228,11 +228,29 @@ def export_report(
             "(runs student-judge -> docs/judge.md), then re-run this command."
         )
     app_url, logins, missing = _marker_access(markdown)
+    cover_details = _cover_details(markdown)
+    missing_cover_labels = {
+        "github": "GitHub repository",
+        "youtube": "YouTube URL",
+        "agent": "agent used",
+        "email": "account email",
+    }
+    missing.extend(
+        label for key, label in missing_cover_labels.items() if not cover_details.get(key)
+    )
     dest.parent.mkdir(parents=True, exist_ok=True)
 
     pdf = _new_pdf(bool(missing))
     with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as tmp:
-        cover = _cover_html(clean_name, clean_id, app_url, logins, integrity, missing)
+        cover = _cover_html(
+            clean_name,
+            clean_id,
+            app_url,
+            logins,
+            cover_details,
+            integrity,
+            missing,
+        )
         body = _markdown_to_html(markdown, src.parent, Path(tmp))
         appendix = _markdown_to_html(
             appendix_markdown(transcripts),
@@ -582,6 +600,7 @@ def _cover_html(
     student_id: str,
     app_url: str,
     logins: str,
+    cover_details: dict[str, str],
     integrity: IntegrityResult,
     missing: list[str],
 ) -> str:
@@ -592,11 +611,25 @@ def _cover_html(
     if len(root) > 28:
         root = f"{root[:12]}...{root[-10:]}"
     integrity_value = html_lib.escape(f"{integrity.status.upper()}. Root {root}")
+
+    def linked_value(url: str, display: str | None = None) -> str:
+        safe_url = html_lib.escape(url, quote=True)
+        safe_display = html_lib.escape(display or url)
+        return f'<a href="{safe_url}">{safe_display}</a>' if url else "Not yet"
+
     rows = [
         ("Student name", html_lib.escape(name), False),
         ("Student ID", html_lib.escape(student_id), False),
         ("Deployed app", html_lib.escape(app_url), False),
         ("Logins", login_html, False),
+        ("GitHub", linked_value(cover_details.get("github", "")), False),
+        ("YouTube URL", linked_value(cover_details.get("youtube", "")), False),
+        ("Agent used", html_lib.escape(cover_details.get("agent", "Not yet")), False),
+        (
+            "Account email",
+            html_lib.escape(cover_details.get("email", "Not yet")),
+            False,
+        ),
         ("Skill integrity", integrity_value, not integrity.ok),
     ]
     cells = []
@@ -647,6 +680,23 @@ def _section(markdown: str, *titles: str) -> str:
         if capture:
             lines.append(line)
     return "\n".join(lines).strip()
+
+
+def _cover_details(markdown: str) -> dict[str, str]:
+    """Read optional submission fields stored in a non-rendered report comment."""
+    match = re.search(r"<!--\s*report-cover\s*\n(.*?)\n\s*-->", markdown, re.DOTALL)
+    details: dict[str, str] = {}
+    if match:
+        for line in match.group(1).splitlines():
+            key, separator, value = line.partition("=")
+            if separator:
+                details[key.strip().lower()] = value.strip()
+
+    youtube = _section(markdown, "youtube url")
+    youtube_urls = re.findall(r"https?://[^\s)]+", youtube)
+    if youtube_urls:
+        details["youtube"] = youtube_urls[0]
+    return details
 
 
 def _marker_access(markdown: str) -> tuple[str, str, list[str]]:

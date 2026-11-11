@@ -233,7 +233,7 @@ https://faststarter-fmz5.onrender.com/
 
 ### Latest deployment status
 
-- **Latest commit:** [`af1ee7c8212c94f27e594f6d5622d0b77c0bc93b`](https://github.com/nirv-exe/comp3613a1/commit/af1ee7c8212c94f27e594f6d5622d0b77c0bc93b) — `Final Commit`
+- **Latest commit:** [`aab6bfe9b084dc57fbc8445137865430cf0356d8`](https://github.com/nirv-exe/comp3613a1/commit/aab6bfe9b084dc57fbc8445137865430cf0356d8) — `updated judge and report`
 - **Deployment status:** Successful
 - **Health check:** `https://faststarter-fmz5.onrender.com/health` returned `{"ok":true}`
 - **Render web service:** Live
@@ -249,6 +249,12 @@ Every account a marker needs, including extra users you added. Starter accounts:
 ## YouTube URL
 
 [Demonstration video](https://youtu.be/pwO2xXZIhiA)
+
+<!-- report-cover
+github=https://github.com/nirv-exe/comp3613a1
+agent=GitHub Copilot Agent; OpenAI Codex and Google Antigravity were used for deployment attempts due to Copilot credit limits.
+email=niravpaltoo12@gmail.com
+-->
 
 ## Session transcripts
 
