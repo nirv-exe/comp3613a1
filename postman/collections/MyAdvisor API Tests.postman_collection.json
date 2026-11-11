@@ -1,0 +1,228 @@
+{
+  "info": {
+    "_postman_id": "c6fcece7-406b-44ae-a35b-f6623254dbaf",
+    "name": "MyAdvisor API Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "60107288",
+    "_collection_link": "https://go.postman.co/collection/60107288-c6fcece7-406b-44ae-a35b-f6623254dbaf?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "TC01 - Health Check",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "\r\npm.test(\"Health endpoint returns HTTP 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Application reports healthy status\", function () {\r\n    const response = pm.response.json();\r\n    pm.expect(response.ok).to.eql(true);\r\n});\r\n\r\npm.test(\"Response is JSON\", function () {\r\n    pm.response.to.be.json;\r\n});\r\n"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/health",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "health"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "TC02 - Retrieve Users",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "\r\npm.test(\"Users endpoint returns HTTP 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response is an array\", function () {\r\n    const users = pm.response.json();\r\n    pm.expect(users).to.be.an(\"array\");\r\n});\r\n\r\npm.test(\"Users contain required properties\", function () {\r\n    const users = pm.response.json();\r\n\r\n    pm.expect(users.length).to.be.above(0);\r\n\r\n    users.forEach(function (user) {\r\n        pm.expect(user).to.have.property(\"id\");\r\n        pm.expect(user).to.have.property(\"username\");\r\n        pm.expect(user).to.have.property(\"email\");\r\n    });\r\n});\r\n"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/users",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "users"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "TC03 - Valid Student Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "\r\npm.test(\"Valid login returns HTTP 303\", function () {\r\n    pm.response.to.have.status(303);\r\n});\r\n\r\npm.test(\"Authentication cookie is issued\", function () {\r\n    const cookie = pm.response.headers.get(\"Set-Cookie\");\r\n\r\n    pm.expect(cookie).to.include(\"access_token=\");\r\n});\r\n\r\npm.test(\"Student is redirected to application\", function () {\r\n    const location = pm.response.headers.get(\"Location\");\r\n\r\n    pm.expect(location).to.match(/\\/app\\/?$/);\r\n});\r\n"
+            ]
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "username",
+              "value": "{{studentUsername}}"
+            },
+            {
+              "key": "password",
+              "value": "{{StudentPassword}}"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "TC04 - Invalid Login",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "\r\npm.test(\"Invalid login returns HTTP 303\", function () {\r\n    pm.response.to.have.status(303);\r\n});\r\n\r\npm.test(\"Invalid login redirects to login page\", function () {\r\n    const location = pm.response.headers.get(\"Location\");\r\n\r\n    pm.expect(location).to.include(\"/login\");\r\n});\r\n\r\npm.test(\"No new authentication token is issued\", function () {\r\n    const cookie = pm.response.headers.get(\"Set-Cookie\") || \"\";\r\n\r\n    pm.expect(cookie).not.to.include(\"access_token=\");\r\n});\r\n"
+            ]
+          }
+        }
+      ],
+      "protocolProfileBehavior": {
+        "followRedirects": false
+      },
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "urlencoded",
+          "urlencoded": [
+            {
+              "key": "username",
+              "value": "bob"
+            },
+            {
+              "key": "password",
+              "value": "incorrect123"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "TC05 - Authenticated Student Progress",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "\r\npm.test(\"Progress endpoint returns HTTP 200\", function () {\r\n    pm.response.to.have.status(200);\r\n});\r\n\r\npm.test(\"Response contains HTML\", function () {\r\n    const contentType =\r\n        pm.response.headers.get(\"Content-Type\");\r\n\r\n    pm.expect(contentType).to.include(\"text/html\");\r\n});\r\n\r\npm.test(\"Academic progress content is displayed\", function () {\r\n    pm.expect(pm.response.text())\r\n        .to.include(\"Your academic overview\");\r\n});\r\n"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/app/progress",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "app",
+            "progress"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "TC06 - Student Admin Access Denied",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "\r\npm.test(\"Unauthorized page is displayed\", function () {\r\n    pm.expect(pm.response.text())\r\n        .to.include(\"Unauthorized\");\r\n});\r\n\r\npm.test(\"Student cannot view admin dashboard\", function () {\r\n    pm.expect(pm.response.text())\r\n        .to.include(\"You do not have permission\");\r\n});\r\n"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/admin/dashboard",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "admin",
+            "dashboard"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": ""
+    },
+    {
+      "key": "studentUsername",
+      "value": ""
+    },
+    {
+      "key": "StudentPassword",
+      "value": ""
+    }
+  ]
+}

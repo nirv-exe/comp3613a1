@@ -1,0 +1,38 @@
+$kind: http-request
+url: "{{baseUrl}}/app/progress"
+method: GET
+scripts:
+  - type: afterResponse
+    code: "\r
+
+      pm.test(\"Progress endpoint returns HTTP 200\", function () {\r
+
+      \    pm.response.to.have.status(200);\r
+
+      });\r
+
+      \r
+
+      pm.test(\"Response contains HTML\", function () {\r
+
+      \    const contentType =\r
+
+      \        pm.response.headers.get(\"Content-Type\");\r
+
+      \r
+
+      \    pm.expect(contentType).to.include(\"text/html\");\r
+
+      });\r
+
+      \r
+
+      pm.test(\"Academic progress content is displayed\", function () {\r
+
+      \    pm.expect(pm.response.text())\r
+
+      \        .to.include(\"Your academic overview\");\r
+
+      });\r\n"
+    language: text/javascript
+order: 5000

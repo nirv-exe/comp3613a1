@@ -1,0 +1,26 @@
+$kind: http-request
+url: "{{baseUrl}}/admin/dashboard"
+method: GET
+scripts:
+  - type: afterResponse
+    code: "\r
+
+      pm.test(\"Unauthorized page is displayed\", function () {\r
+
+      \    pm.expect(pm.response.text())\r
+
+      \        .to.include(\"Unauthorized\");\r
+
+      });\r
+
+      \r
+
+      pm.test(\"Student cannot view admin dashboard\", function () {\r
+
+      \    pm.expect(pm.response.text())\r
+
+      \        .to.include(\"You do not have permission\");\r
+
+      });\r\n"
+    language: text/javascript
+order: 6000

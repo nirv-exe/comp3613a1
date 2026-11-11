@@ -1,0 +1,45 @@
+$kind: http-request
+url: "{{baseUrl}}/login"
+method: POST
+body:
+  type: urlencoded
+  content:
+    username: bob
+    password: incorrect123
+scripts:
+  - type: afterResponse
+    code: "\r
+
+      pm.test(\"Invalid login returns HTTP 303\", function () {\r
+
+      \    pm.response.to.have.status(303);\r
+
+      });\r
+
+      \r
+
+      pm.test(\"Invalid login redirects to login page\", function () {\r
+
+      \    const location = pm.response.headers.get(\"Location\");\r
+
+      \r
+
+      \    pm.expect(location).to.include(\"/login\");\r
+
+      });\r
+
+      \r
+
+      pm.test(\"No new authentication token is issued\", function () {\r
+
+      \    const cookie = pm.response.headers.get(\"Set-Cookie\") || \"\";\r
+
+      \r
+
+      \    pm.expect(cookie).not.to.include(\"access_token=\");\r
+
+      });\r\n"
+    language: text/javascript
+settings:
+  followRedirects: false
+order: 4000

@@ -1,0 +1,45 @@
+$kind: http-request
+url: "{{baseUrl}}/login"
+method: POST
+body:
+  type: urlencoded
+  content:
+    username: "{{studentUsername}}"
+    password: "{{StudentPassword}}"
+scripts:
+  - type: afterResponse
+    code: "\r
+
+      pm.test(\"Valid login returns HTTP 303\", function () {\r
+
+      \    pm.response.to.have.status(303);\r
+
+      });\r
+
+      \r
+
+      pm.test(\"Authentication cookie is issued\", function () {\r
+
+      \    const cookie = pm.response.headers.get(\"Set-Cookie\");\r
+
+      \r
+
+      \    pm.expect(cookie).to.include(\"access_token=\");\r
+
+      });\r
+
+      \r
+
+      pm.test(\"Student is redirected to application\", function () {\r
+
+      \    const location = pm.response.headers.get(\"Location\");\r
+
+      \r
+
+      \    pm.expect(location).to.match(/\\/app\\/?$/);\r
+
+      });\r\n"
+    language: text/javascript
+settings:
+  followRedirects: false
+order: 3000
